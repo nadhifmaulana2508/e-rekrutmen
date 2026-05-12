@@ -1,0 +1,5 @@
+# Protect internal files
+<FilesMatch "\.(env|ini|log|sql)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

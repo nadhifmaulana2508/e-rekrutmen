@@ -1,0 +1,8 @@
+api/.env
+.env
+uploads/cv/*
+uploads/foto/*
+!uploads/cv/.gitkeep
+!uploads/foto/.gitkeep
+.DS_Store
+zzz/
