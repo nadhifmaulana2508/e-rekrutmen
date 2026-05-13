@@ -22,12 +22,11 @@ CREATE TABLE `admin` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed default admin -> username: admin, password: admin123
+-- Hash bcrypt dibuat via: password_hash('admin123', PASSWORD_BCRYPT)
 INSERT INTO `admin` (`username`, `password`, `nama`, `email`, `role`) VALUES
-('admin', '$2y$10$3sVZ8m6Dg3aGzYqfS5M1IO9j7dWcH0hZ4Tf9xG7JZq5mQ2o0nJc.a', 'Super Administrator', 'admin@rekrutmen.test', 'superadmin');
--- NOTE: hash di atas tidak valid untuk login, PASTIKAN user mengganti lewat reset script.
--- Untuk kemudahan local, gunakan statement berikut untuk re-set password admin123:
--- UPDATE admin SET password = (SELECT ... ) WHERE username='admin';
--- Atau jalankan: php sql/seed.php
+('admin', '$2y$12$shGa72o4OfADCICf.tbk.ebnZWADl5UW1GuJQfwoQs/yd5CYsjPwO', 'Super Administrator', 'admin@rekrutmen.test', 'superadmin');
+-- Login default: admin / admin123
+-- Jika butuh reset password, jalankan: php sql/seed.php
 
 -- ===== TABEL LOWONGAN =====
 DROP TABLE IF EXISTS `lowongan`;
@@ -54,13 +53,13 @@ CREATE TABLE `lowongan` (
   CONSTRAINT `fk_lowongan_admin` FOREIGN KEY (`dibuat_oleh`) REFERENCES `admin`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Seed contoh lowongan
+-- Seed contoh lowongan (dibuat_oleh = NULL untuk amankan dari FK issue)
 INSERT INTO `lowongan` (`judul`,`divisi`,`lokasi`,`tipe_kerja`,`level`,`deskripsi`,`requirements`,`benefits`,`gaji_min`,`gaji_max`,`deadline`,`status`,`dibuat_oleh`) VALUES
-('Frontend Developer','Teknologi','Jakarta Selatan','full_time','middle','Bertanggung jawab mengembangkan antarmuka web yang modern, cepat, dan aksesibel untuk produk internal maupun produk pelanggan.','Minimal S1 Teknik Informatika / sederajat\nMenguasai HTML, CSS, JavaScript, dan framework modern (React/Vue)\nPengalaman minimal 2 tahun\nMemahami responsive design & performance tuning\nTerbiasa dengan Git workflow','BPJS Kesehatan & Ketenagakerjaan\nTunjangan makan & transport\nBonus tahunan\nRemote friendly (hybrid)\nLaptop disediakan',8000000,15000000,'2026-07-31','aktif',1),
-('Backend Engineer (PHP)','Teknologi','Semarang','full_time','senior','Membangun dan memelihara REST API, mengoptimalkan query database, serta melakukan code review untuk tim junior.','Pengalaman min. 4 tahun PHP (Laravel/Symfony/Native)\nMahir MySQL/PostgreSQL, indexing & query optimization\nPaham konsep OOP, SOLID, Design Patterns\nTerbiasa dengan CI/CD (GitHub Actions/GitLab CI)\nNilai plus: Docker, Redis, RabbitMQ',"BPJS Kesehatan & Ketenagakerjaan\nGaji kompetitif\nWFH 3 hari/minggu\nAllowance pelatihan/sertifikasi\nMakan siang gratis",12000000,22000000,'2026-06-30','aktif',1),
-('HR Recruiter','Human Resources','Jakarta Selatan','full_time','junior','Mengelola end-to-end proses rekrutmen mulai dari sourcing, screening, hingga onboarding kandidat.','Minimal S1 Psikologi / Manajemen SDM\nPengalaman min. 1 tahun di bidang rekrutmen\nMemahami teknik interview behavioral\nKomunikatif dan detail-oriented\nTerbiasa menggunakan ATS (Applicant Tracking System)','BPJS Kesehatan & Ketenagakerjaan\nKomisi per kandidat onboard\nTraining HR profesional\nCuti tahunan 14 hari',6000000,9000000,'2026-06-15','aktif',1),
-('UI/UX Designer','Desain','Remote','kontrak','middle','Merancang pengalaman pengguna untuk produk digital perusahaan serta membangun dan menjaga design system.','Portfolio yang kuat (Dribbble/Behance/Figma)\nMenguasai Figma, desain sistem, prototyping\nPaham prinsip accessibility & usability\nPengalaman min. 2 tahun\nNilai plus: motion design (After Effects/Rive)','Fully remote\nKontrak 12 bulan (extendable)\nAllowance hardware\nMacBook Pro disediakan',10000000,16000000,'2026-07-15','aktif',1),
-('Management Trainee','Operasional','Surabaya','full_time','fresh_graduate','Program pengembangan pemimpin masa depan. Rotasi ke beberapa divisi selama 18 bulan.','S1 semua jurusan, IPK min 3.25\nFresh graduate atau pengalaman maks 1 tahun\nUsia maksimal 25 tahun\nLeadership, komunikasi, dan analytical thinking baik\nBersedia ditempatkan di seluruh Indonesia','Gaji pokok + tunjangan program\nMentor 1-on-1\nFast track career path\nBPJS & asuransi kesehatan swasta\nDinas ke luar kota',7500000,10000000,'2026-06-30','aktif',1);
+('Frontend Developer','Teknologi','Jakarta Selatan','full_time','middle','Bertanggung jawab mengembangkan antarmuka web yang modern, cepat, dan aksesibel untuk produk internal maupun produk pelanggan.','Minimal S1 Teknik Informatika / sederajat\nMenguasai HTML, CSS, JavaScript, dan framework modern (React/Vue)\nPengalaman minimal 2 tahun\nMemahami responsive design & performance tuning\nTerbiasa dengan Git workflow','BPJS Kesehatan & Ketenagakerjaan\nTunjangan makan & transport\nBonus tahunan\nRemote friendly (hybrid)\nLaptop disediakan',8000000,15000000,'2026-07-31','aktif',NULL),
+('Backend Engineer (PHP)','Teknologi','Semarang','full_time','senior','Membangun dan memelihara REST API, mengoptimalkan query database, serta melakukan code review untuk tim junior.','Pengalaman min. 4 tahun PHP (Laravel/Symfony/Native)\nMahir MySQL/PostgreSQL, indexing & query optimization\nPaham konsep OOP, SOLID, Design Patterns\nTerbiasa dengan CI/CD (GitHub Actions/GitLab CI)\nNilai plus: Docker, Redis, RabbitMQ',"BPJS Kesehatan & Ketenagakerjaan\nGaji kompetitif\nWFH 3 hari/minggu\nAllowance pelatihan/sertifikasi\nMakan siang gratis",12000000,22000000,'2026-06-30','aktif',NULL),
+('HR Recruiter','Human Resources','Jakarta Selatan','full_time','junior','Mengelola end-to-end proses rekrutmen mulai dari sourcing, screening, hingga onboarding kandidat.','Minimal S1 Psikologi / Manajemen SDM\nPengalaman min. 1 tahun di bidang rekrutmen\nMemahami teknik interview behavioral\nKomunikatif dan detail-oriented\nTerbiasa menggunakan ATS (Applicant Tracking System)','BPJS Kesehatan & Ketenagakerjaan\nKomisi per kandidat onboard\nTraining HR profesional\nCuti tahunan 14 hari',6000000,9000000,'2026-06-15','aktif',NULL),
+('UI/UX Designer','Desain','Remote','kontrak','middle','Merancang pengalaman pengguna untuk produk digital perusahaan serta membangun dan menjaga design system.','Portfolio yang kuat (Dribbble/Behance/Figma)\nMenguasai Figma, desain sistem, prototyping\nPaham prinsip accessibility & usability\nPengalaman min. 2 tahun\nNilai plus: motion design (After Effects/Rive)','Fully remote\nKontrak 12 bulan (extendable)\nAllowance hardware\nMacBook Pro disediakan',10000000,16000000,'2026-07-15','aktif',NULL),
+('Management Trainee','Operasional','Surabaya','full_time','fresh_graduate','Program pengembangan pemimpin masa depan. Rotasi ke beberapa divisi selama 18 bulan.','S1 semua jurusan, IPK min 3.25\nFresh graduate atau pengalaman maks 1 tahun\nUsia maksimal 25 tahun\nLeadership, komunikasi, dan analytical thinking baik\nBersedia ditempatkan di seluruh Indonesia','Gaji pokok + tunjangan program\nMentor 1-on-1\nFast track career path\nBPJS & asuransi kesehatan swasta\nDinas ke luar kota',7500000,10000000,'2026-06-30','aktif',NULL);
 
 -- ===== TABEL PELAMAR =====
 DROP TABLE IF EXISTS `pelamar`;

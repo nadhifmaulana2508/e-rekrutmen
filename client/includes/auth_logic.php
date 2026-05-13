@@ -17,38 +17,56 @@ if (isset($_GET['logout'])) {
 
 // Handle login POST
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['username'], $_POST['password'])) {
-    $apiUrl = BASE_URL . '/api/auth/login';
-    $payload = json_encode([
-        'username' => trim($_POST['username']),
-        'password' => $_POST['password'],
-    ]);
-
-    // Pola dari PR #8 project lelang: hindari loopback HTTP jika bisa pakai PDO langsung.
-    // Untuk login, kita panggil controller langsung (bukan HTTP loopback).
+    // Pola dari PR #8 project lelang: hindari loopback HTTP, pakai PDO langsung.
+    // NOTE: Jangan panggil AuthController->login() di sini, karena sendResponse()
+    // pakai exit — response JSON-nya akan langsung dilempar ke browser.
+    // Kita verifikasi password + generate JWT langsung di sini.
     require_once __DIR__ . '/../../api/config/database.php';
-    require_once __DIR__ . '/../../api/controllers/AuthController.php';
+    require_once __DIR__ . '/../../api/helpers/JWT.php';
 
-    // Capture output JSON dari controller
-    ob_start();
+    $username = trim($_POST['username']);
+    $password = (string)$_POST['password'];
+
     try {
-        $controller = new AuthController($pdo);
-        $controller->login([
-            'username' => trim($_POST['username']),
-            'password' => $_POST['password'],
-        ]);
-    } catch (Throwable $e) {
-        // sendResponse() exit, jadi jarang sampai sini
-    }
-    $json = ob_get_clean();
-    $res  = json_decode($json, true);
+        $stmt = $pdo->prepare('SELECT * FROM admin WHERE username = :u LIMIT 1');
+        $stmt->execute([':u' => $username]);
+        $user = $stmt->fetch();
 
-    if (is_array($res) && ($res['status'] ?? 0) === 200 && !empty($res['data']['token'])) {
-        $_SESSION['token'] = $res['data']['token'];
-        $_SESSION['user']  = $res['data']['user'];
-        header('Location: ' . BASE_URL . '/client/dashboard');
-        exit;
-    } else {
-        $error_login = $res['message'] ?? 'Login gagal';
+        $ok = false;
+        if ($user) {
+            $hash = (string)$user['password'];
+            if (preg_match('/^\$2[aby]\$/', $hash) || str_starts_with($hash, '$argon')) {
+                $ok = password_verify($password, $hash);
+            } else {
+                // fallback plaintext (dev only)
+                $ok = hash_equals($hash, $password);
+            }
+        }
+
+        if ($user && $ok) {
+            $payload = [
+                'id'       => (int)$user['id'],
+                'username' => $user['username'],
+                'nama'     => $user['nama'],
+                'role'     => $user['role'],
+                'iat'      => time(),
+                'exp'      => time() + 60 * 60 * 8,
+            ];
+            $_SESSION['token'] = generateJWT($payload);
+            $_SESSION['user']  = [
+                'id'       => (int)$user['id'],
+                'username' => $user['username'],
+                'nama'     => $user['nama'],
+                'email'    => $user['email'],
+                'role'     => $user['role'],
+            ];
+            header('Location: ' . BASE_URL . '/client/dashboard');
+            exit;
+        } else {
+            $error_login = 'Username atau password salah';
+        }
+    } catch (Throwable $e) {
+        $error_login = 'Server error: ' . $e->getMessage();
     }
 }
 
