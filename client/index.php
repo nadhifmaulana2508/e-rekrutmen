@@ -153,24 +153,8 @@ $titles = [
         <div class="flex-1 flex flex-col min-w-0">
             <?php renderTopbar($pageTitle, $pageSubtitle); ?>
 
-            <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
-                <?php
-                $view_file = __DIR__ . "/includes/views/{$page}.php";
-                if (file_exists($view_file)) {
-                    include $view_file;
-                } else {
-                    echo '<div class="bg-white rounded-2xl p-10 text-center">
-                            <i class="fa-solid fa-face-frown text-5xl text-slate-300 mb-3"></i>
-                            <p class="font-bold text-slate-800">Halaman tidak ditemukan</p>
-                          </div>';
-                }
-                ?>
-            </main>
-        </div>
-    </div>
-
-    <script>
-    // Global admin helper
+            <script>
+    // Global admin helper - HARUS sebelum views yang pakai ADMIN.api()
     window.ADMIN = {
         token:  '<?= htmlspecialchars($_SESSION['token'] ?? '') ?>',
         baseUrl:'<?= BASE_URL ?>',
@@ -304,6 +288,22 @@ $titles = [
         overlay.classList.add('hidden');
     });
     </script>
+
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+                <?php
+                $view_file = __DIR__ . "/includes/views/{$page}.php";
+                if (file_exists($view_file)) {
+                    include $view_file;
+                } else {
+                    echo '<div class="bg-white rounded-2xl p-10 text-center">
+                            <i class="fa-solid fa-face-frown text-5xl text-slate-300 mb-3"></i>
+                            <p class="font-bold text-slate-800">Halaman tidak ditemukan</p>
+                          </div>';
+                }
+                ?>
+            </main>
+        </div>
+    </div>
 <?php endif; ?>
 
 </body>

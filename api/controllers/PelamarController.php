@@ -234,17 +234,11 @@ class PelamarController {
             }
         }
 
-        // Kirim email kode tracking
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $baseUrl  = $protocol . '://' . $host . dirname(dirname($_SERVER['SCRIPT_NAME']));
-        sendTrackingEmail(
-            trim($data['email']),
-            trim($data['nama_lengkap']),
-            $kode,
-            $data['posisi_dilamar'],
-            rtrim($baseUrl, '/')
-        );
+        // TODO: Kirim email kode tracking (uncomment setelah composer install + setup SMTP)
+        // $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        // $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        // $baseUrl  = $protocol . '://' . $host . dirname(dirname($_SERVER['SCRIPT_NAME']));
+        // sendTrackingEmail(trim($data['email']), trim($data['nama_lengkap']), $kode, $data['posisi_dilamar'], rtrim($baseUrl, '/'));
 
         sendResponse(201, 'Lamaran berhasil dikirim! Simpan kode tracking Anda.', [
             'id'            => $pelamarId,
@@ -342,23 +336,14 @@ class PelamarController {
             ':id' => $id,
         ]);
         
-        // Kirim email notifikasi perubahan status
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-        $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $scriptDir = dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'));
-        $baseUrl  = $protocol . '://' . $host . rtrim($scriptDir, '/');
+        // TODO: Kirim email notifikasi perubahan status (uncomment setelah composer install + setup SMTP)
+        // $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        // $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        // $scriptDir = dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'));
+        // $baseUrl  = $protocol . '://' . $host . rtrim($scriptDir, '/');
+        // sendStatusUpdateEmail($p['email'], $p['nama_lengkap'], $p['kode_tracking'], $p['posisi_dilamar'], $status, $data['catatan_admin'] ?? '', $baseUrl);
         
-        sendStatusUpdateEmail(
-            $p['email'],
-            $p['nama_lengkap'],
-            $p['kode_tracking'],
-            $p['posisi_dilamar'],
-            $status,
-            $data['catatan_admin'] ?? '',
-            $baseUrl
-        );
-        
-        sendResponse(200, 'Status pelamar diperbarui & notifikasi email dikirim');
+        sendResponse(200, 'Status pelamar diperbarui');
     }
 
     /** DELETE /api/pelamar/{id} (admin) */
