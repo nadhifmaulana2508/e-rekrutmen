@@ -1,11 +1,11 @@
 <?php $id = (int)($_GET['id'] ?? 0); ?>
-<section class="py-8 bg-slate-50 min-h-screen">
+<section class="py-8 bg-gray-50 min-h-screen">
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
-<a href="<?= BASE_URL ?>/detail/<?= $id ?>" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-600 font-semibold mb-6"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+<a href="<?= BASE_URL ?>/detail/<?= $id ?>" class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-brand-600 font-semibold mb-6"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
 
 <!-- WIZARD HEADER -->
 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mb-6">
-<div class="p-6 gradient-brand text-white">
+<div class="p-6 gradient-blue text-white">
     <div class="flex items-center gap-3 mb-2">
         <img src="https://upload.wikimedia.org/wikipedia/id/thumb/9/9e/Logo_BPR_BKK.png/220px-Logo_BPR_BKK.png" alt="Logo" class="h-12 bg-white rounded-lg p-1" onerror="this.style.display='none'">
         <div>
@@ -26,7 +26,7 @@
 <!-- SECTION A: POSISI -->
 <div class="form-section" data-step="0">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">A</span> Posisi yang Dilamar</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">A</span> Posisi yang Dilamar</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 <div>
     <label class="label">Posisi yang Dilamar <span class="text-rose-500">*</span></label>
@@ -84,7 +84,7 @@
 <!-- SECTION B: DATA PRIBADI -->
 <div class="form-section hidden" data-step="1">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">B</span> Data Pribadi</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">B</span> Data Pribadi</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 <div class="sm:col-span-2"><label class="label">Nama Lengkap sesuai KTP <span class="text-rose-500">*</span></label><input type="text" name="nama_lengkap" required class="input"></div>
 <div><label class="label">Nama Panggilan</label><input type="text" name="nama_panggilan" class="input"></div>
@@ -121,7 +121,7 @@
 <!-- SECTION C: PENDIDIKAN -->
 <div class="form-section hidden" data-step="2">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">C</span> Pendidikan</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">C</span> Pendidikan</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 <div><label class="label">Pendidikan Terakhir <span class="text-rose-500">*</span></label>
     <select name="pendidikan_terakhir" required class="input" id="sel-pend">
@@ -141,7 +141,7 @@
 <!-- SECTION D: PENGALAMAN KERJA -->
 <div class="form-section hidden" data-step="3">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">D</span> Pengalaman Kerja</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">D</span> Pengalaman Kerja</h2>
 <p class="text-sm text-slate-500 mb-4">Isi jika memiliki pengalaman kerja (boleh lebih dari 1). Kosongkan jika fresh graduate.</p>
 <div id="exp-container"></div>
 <button type="button" id="btn-add-exp" class="mt-3 px-4 py-2 rounded-xl bg-brand-50 text-brand-700 font-bold text-sm hover:bg-brand-100 transition">
@@ -153,7 +153,7 @@
 <!-- SECTION E: KEMAMPUAN -->
 <div class="form-section hidden" data-step="4">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">E</span> Kemampuan &amp; Kompetensi</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">E</span> Kemampuan &amp; Kompetensi</h2>
 <div class="space-y-4">
 <div>
     <label class="label">Kemampuan Komputer <span class="text-rose-500">*</span> (pilih semua yang dikuasai)</label>
@@ -189,7 +189,7 @@
 <!-- SECTION F: KHUSUS POSISI -->
 <div class="form-section hidden" data-step="5">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">F</span> Khusus Posisi Tertentu</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">F</span> Khusus Posisi Tertentu</h2>
 <p class="text-sm text-slate-500 mb-4">Isi sesuai posisi yang Anda lamar. Lewati jika tidak relevan.</p>
 
 <div id="khusus-ao" class="mb-6 p-4 bg-amber-50 rounded-xl border border-amber-100 hidden">
@@ -230,7 +230,7 @@
 <!-- SECTION G: INFORMASI TAMBAHAN -->
 <div class="form-section hidden" data-step="6">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">G</span> Informasi Tambahan</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">G</span> Informasi Tambahan</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 <div><label class="label">Pernah terlibat kasus hukum? <span class="text-rose-500">*</span></label>
     <select name="pernah_kasus_hukum" required class="input"><option value="Tidak">Tidak</option><option value="Ya">Ya</option></select></div>
@@ -249,7 +249,7 @@
 <!-- SECTION H: DOKUMEN -->
 <div class="form-section hidden" data-step="7">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">H</span> Dokumen Unggah</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">H</span> Dokumen Unggah</h2>
 <p class="text-sm text-slate-500 mb-4">Format: PDF atau gambar (JPG/PNG). Maksimal 5MB per file.</p>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 <div><label class="label">Surat Lamaran <span class="text-rose-500">*</span></label><input type="file" name="dokumen_surat_lamaran" accept=".pdf,.jpg,.jpeg,.png" required class="input file-input"></div>
@@ -270,7 +270,7 @@
 <!-- SECTION I: PERNYATAAN -->
 <div class="form-section hidden" data-step="8">
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
-<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-brand text-white flex items-center justify-center text-sm font-bold">I</span> Pernyataan</h2>
+<h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">I</span> Pernyataan</h2>
 <div class="space-y-3 mb-6">
     <label class="flex items-start gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition">
         <input type="checkbox" name="pernyataan_data_benar" value="1" required class="mt-1 accent-brand-600">
@@ -299,10 +299,10 @@
         <i class="fa-solid fa-arrow-left mr-1"></i> Sebelumnya
     </button>
     <div class="flex-1"></div>
-    <button type="button" id="btn-next" class="px-6 py-3 rounded-xl gradient-brand text-white font-bold text-sm shadow-lg hover:-translate-y-0.5 transition">
+    <button type="button" id="btn-next" class="px-6 py-3 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm shadow-lg hover:-translate-y-0.5 transition">
         Selanjutnya <i class="fa-solid fa-arrow-right ml-1"></i>
     </button>
-    <button type="submit" id="btn-submit" class="hidden px-6 py-3 rounded-xl gradient-brand text-white font-bold text-sm shadow-lg hover:-translate-y-0.5 transition">
+    <button type="submit" id="btn-submit" class="hidden px-6 py-3 rounded-xl bg-accent-500 hover:bg-accent-600 text-white font-bold text-sm shadow-lg hover:-translate-y-0.5 transition">
         <i class="fa-solid fa-paper-plane mr-1"></i> Kirim Lamaran
     </button>
 </div>
@@ -319,20 +319,20 @@
     <p class="text-slate-600 text-sm mb-4">Simpan kode tracking berikut untuk memantau status lamaran Anda:</p>
     <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-4 mb-4">
         <p class="text-xs text-slate-500 font-semibold mb-1">KODE TRACKING</p>
-        <p id="kode-tracking" class="text-xl font-black gradient-text tracking-wider"></p>
+        <p id="kode-tracking" class="text-xl font-black text-brand-700 tracking-wider"></p>
     </div>
     <p class="text-xs text-slate-500 mb-4">Kode ini juga telah dikirim ke email Anda.</p>
     <div class="flex flex-col sm:flex-row gap-2">
         <button id="copy-kode" class="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-700 transition text-sm"><i class="fa-regular fa-copy mr-1"></i> Salin Kode</button>
-        <a href="<?= BASE_URL ?>/status" class="flex-1 py-3 rounded-xl gradient-brand text-white font-bold text-sm text-center">Cek Status</a>
+        <a href="<?= BASE_URL ?>/status" class="flex-1 py-3 rounded-xl bg-brand-700 text-white font-bold text-sm text-center">Cek Status</a>
     </div>
 </div>
 </div>
 
 <style>
 .label{display:block;font-size:.8125rem;font-weight:600;color:#334155;margin-bottom:.375rem}
-.input{width:100%;padding:.625rem .875rem;border-radius:.625rem;background:#f8fafc;border:1px solid #e2e8f0;font-size:.875rem;transition:all .2s}
-.input:focus{outline:none;background:#fff;border-color:#6366f1;box-shadow:0 0 0 3px #e0e7ff}
+.input{width:100%;padding:.625rem .875rem;border-radius:.625rem;background:#f9fafb;border:1px solid #e5e7eb;font-size:.875rem;transition:all .2s}
+.input:focus{outline:none;background:#fff;border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe}
 .file-input{padding:.5rem}
 </style>
 
@@ -370,8 +370,8 @@ let current=0;
 // Build step indicator
 indicator.innerHTML=steps.map((s,i)=>`
 <div class="flex items-center gap-1 step-item" data-i="${i}">
-    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ${i===0?'gradient-brand text-white':'bg-slate-200 text-slate-500'}">${i+1}</div>
-    <span class="text-xs font-semibold whitespace-nowrap hidden sm:inline ${i===0?'text-brand-700':'text-slate-400'}">${s}</span>
+    <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ${i===0?'bg-brand-700 text-white':'bg-gray-200 text-gray-500'}">${i+1}</div>
+    <span class="text-xs font-semibold whitespace-nowrap hidden sm:inline ${i===0?'text-brand-700':'text-gray-400'}">${s}</span>
     ${i<steps.length-1?'<div class="w-4 h-0.5 bg-slate-200 mx-1"></div>':''}
 </div>`).join('');
 
@@ -381,8 +381,8 @@ function showStep(n){
         const dot=el.querySelector('div');
         const txt=el.querySelector('span');
         if(i<n){dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-emerald-500 text-white';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-emerald-600';}
-        else if(i===n){dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold gradient-brand text-white';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-brand-700';}
-        else{dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-slate-200 text-slate-500';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-slate-400';}
+        else if(i===n){dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-brand-700 text-white';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-brand-700';}
+        else{dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gray-200 text-gray-500';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-gray-400';}
     });
     btnPrev.classList.toggle('hidden',n===0);
     btnNext.classList.toggle('hidden',n===steps.length-1);
