@@ -1,6 +1,6 @@
 <?php $id = (int)($_GET['id'] ?? 0); ?>
 <section class="py-8 bg-slate-50 min-h-screen">
-<div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
 <a href="<?= BASE_URL ?>/detail/<?= $id ?>" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-brand-600 font-semibold mb-6"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
 
 <!-- WIZARD HEADER -->
@@ -60,7 +60,7 @@
 </div>
 <div>
     <label class="label">Ekspektasi Gaji (Rp)</label>
-    <input type="number" name="ekspektasi_gaji" class="input" placeholder="5000000">
+    <input type="text" name="ekspektasi_gaji" class="input nominal-format" placeholder="5.000.000" inputmode="numeric">
 </div>
 <div>
     <label class="label">Ketersediaan Mulai Bekerja <span class="text-rose-500">*</span></label>
@@ -336,6 +336,23 @@
 .file-input{padding:.5rem}
 </style>
 
+<script>
+// Auto-format nominal input dengan titik ribuan (juga untuk dynamic fields)
+function initNominalFormat(el) {
+    el.addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '');
+        this.value = v ? Number(v).toLocaleString('id-ID') : '';
+    });
+}
+document.querySelectorAll('.nominal-format').forEach(initNominalFormat);
+// Observer untuk dynamic fields
+new MutationObserver(mutations => {
+    mutations.forEach(m => m.addedNodes.forEach(n => {
+        if (n.querySelectorAll) n.querySelectorAll('.nominal-format').forEach(initNominalFormat);
+    }));
+}).observe(document.body, {childList:true, subtree:true});
+</script>
+
 
 <script>
 (async function(){
@@ -422,7 +439,7 @@ function addExp(){
         <div><label class="label text-xs">Nama Perusahaan</label><input type="text" class="input exp-field" data-key="nama_perusahaan"></div>
         <div><label class="label text-xs">Jabatan</label><input type="text" class="input exp-field" data-key="jabatan"></div>
         <div><label class="label text-xs">Periode Kerja</label><input type="text" class="input exp-field" data-key="periode_kerja" placeholder="Jan 2022 - Des 2023"></div>
-        <div><label class="label text-xs">Gaji Terakhir (Rp)</label><input type="number" class="input exp-field" data-key="gaji_terakhir"></div>
+        <div><label class="label text-xs">Gaji Terakhir (Rp)</label><input type="text" class="input exp-field nominal-format" data-key="gaji_terakhir" placeholder="5.000.000" inputmode="numeric"></div>
         <div class="sm:col-span-2"><label class="label text-xs">Deskripsi Pekerjaan</label><textarea rows="2" class="input exp-field" data-key="deskripsi_pekerjaan"></textarea></div>
         <div class="sm:col-span-2"><label class="label text-xs">Alasan Berhenti</label><input type="text" class="input exp-field" data-key="alasan_berhenti"></div>
         </div></div>`;
@@ -444,11 +461,22 @@ document.getElementById('apply-form').addEventListener('submit',async e=>{
 
     const fd=new FormData(e.target);
 
+    // Clean nominal formatted values (remove dots)
+    document.querySelectorAll('.nominal-format').forEach(inp => {
+        if (inp.name && fd.has(inp.name)) {
+            fd.set(inp.name, inp.value.replace(/\./g, ''));
+        }
+    });
+
     // Collect pengalaman as JSON
     const exps=[];
     document.querySelectorAll('.exp-item').forEach(item=>{
         const obj={};
-        item.querySelectorAll('.exp-field').forEach(f=>{obj[f.dataset.key]=f.value});
+        item.querySelectorAll('.exp-field').forEach(f=>{
+            let val = f.value;
+            if (f.dataset.key === 'gaji_terakhir') val = val.replace(/\./g, '');
+            obj[f.dataset.key] = val;
+        });
         if(obj.nama_perusahaan)exps.push(obj);
     });
     fd.append('pengalaman',JSON.stringify(exps));

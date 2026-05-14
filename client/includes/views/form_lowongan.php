@@ -47,16 +47,22 @@ $masterPenempatan = [
                 <textarea name="persyaratan" rows="5" class="input" placeholder="Warga Negara Indonesia&#10;Usia maksimal 27 tahun&#10;Pendidikan minimal D3/S1&#10;IPK minimal 2.75"></textarea>
             </div>
 
-            <!-- POSISI (checkbox picklist) -->
+            <!-- POSISI (checkbox picklist + custom add) -->
             <div>
                 <label class="label">Posisi yang Dibuka <span class="text-rose-500">*</span> <span class="text-xs font-normal text-slate-400">(centang yang ingin dibuka)</span></label>
-                <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div id="posisi-container" class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
                     <?php foreach ($masterPosisi as $p): ?>
                         <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-white p-1.5 rounded-lg transition">
                             <input type="checkbox" name="posisi_tersedia[]" value="<?= htmlspecialchars($p) ?>" class="accent-brand-600 chk-posisi">
                             <span><?= htmlspecialchars($p) ?></span>
                         </label>
                     <?php endforeach; ?>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <input type="text" id="inp-custom-posisi" class="input flex-1" placeholder="Tambah posisi baru (misal: Pejabat Cabang)...">
+                    <button type="button" id="btn-add-posisi" class="px-4 py-2 rounded-xl bg-brand-50 text-brand-700 font-bold text-sm hover:bg-brand-100 whitespace-nowrap">
+                        <i class="fa-solid fa-plus mr-1"></i> Tambah
+                    </button>
                 </div>
                 <p class="text-xs text-slate-400 mt-1"><span id="count-posisi" class="font-bold text-brand-600">0</span> posisi dipilih</p>
             </div>
@@ -111,24 +117,50 @@ $masterPenempatan = [
     const form   = document.getElementById('form-lowongan');
     const title  = document.getElementById('form-title');
 
-    // Counter
+    // Counter update function
+    function updatePosisiCount() {
+        document.getElementById('count-posisi').textContent = document.querySelectorAll('.chk-posisi:checked').length;
+    }
+    function updatePenempatanCount() {
+        document.getElementById('count-penempatan').textContent = document.querySelectorAll('.chk-penempatan:checked').length;
+    }
+
     const countP = document.getElementById('count-posisi');
     const countL = document.getElementById('count-penempatan');
-    document.querySelectorAll('.chk-posisi').forEach(c => c.addEventListener('change', () => {
-        countP.textContent = document.querySelectorAll('.chk-posisi:checked').length;
-    }));
-    document.querySelectorAll('.chk-penempatan').forEach(c => c.addEventListener('change', () => {
-        countL.textContent = document.querySelectorAll('.chk-penempatan:checked').length;
-    }));
+    document.querySelectorAll('.chk-posisi').forEach(c => c.addEventListener('change', updatePosisiCount));
+    document.querySelectorAll('.chk-penempatan').forEach(c => c.addEventListener('change', updatePenempatanCount));
+
+    // Add custom posisi
+    document.getElementById('btn-add-posisi').addEventListener('click', () => {
+        const inp = document.getElementById('inp-custom-posisi');
+        const val = inp.value.trim();
+        if (!val) return;
+        // Check if already exists
+        const existing = [...document.querySelectorAll('.chk-posisi')].map(c => c.value.toLowerCase());
+        if (existing.includes(val.toLowerCase())) { ADMIN.toast('Posisi sudah ada', 'warning'); return; }
+        // Add new checkbox
+        const container = document.getElementById('posisi-container');
+        const lbl = document.createElement('label');
+        lbl.className = 'flex items-center gap-2 text-sm cursor-pointer hover:bg-white p-1.5 rounded-lg transition';
+        lbl.innerHTML = `<input type="checkbox" name="posisi_tersedia[]" value="${val}" class="accent-brand-600 chk-posisi" checked><span>${val}</span>`;
+        container.appendChild(lbl);
+        lbl.querySelector('input').addEventListener('change', updatePosisiCount);
+        updatePosisiCount();
+        inp.value = '';
+        ADMIN.toast('Posisi "'+val+'" ditambahkan', 'success');
+    });
+    document.getElementById('inp-custom-posisi').addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); document.getElementById('btn-add-posisi').click(); }
+    });
 
     // Select/deselect all penempatan
     document.getElementById('btn-sel-all-loc').addEventListener('click', () => {
         document.querySelectorAll('.chk-penempatan').forEach(c => c.checked = true);
-        countL.textContent = document.querySelectorAll('.chk-penempatan:checked').length;
+        updatePenempatanCount();
     });
     document.getElementById('btn-desel-all-loc').addEventListener('click', () => {
         document.querySelectorAll('.chk-penempatan').forEach(c => c.checked = false);
-        countL.textContent = 0;
+        updatePenempatanCount();
     });
 
     // Edit mode: populate

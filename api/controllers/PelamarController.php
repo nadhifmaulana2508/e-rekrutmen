@@ -270,7 +270,7 @@ class PelamarController {
         }
 
         $sql = 'SELECT p.id, p.id_lowongan, p.kode_tracking, p.posisi_dilamar, p.penempatan,
-                       p.nama_lengkap, p.email, p.no_hp, p.jenis_kelamin,
+                       p.nama_lengkap, p.email, p.no_hp, p.jenis_kelamin, p.foto_3x4,
                        p.pendidikan_terakhir, p.nama_institusi, p.jurusan,
                        p.status_lamaran, p.created_at, p.updated_at,
                        l.judul AS judul_lowongan

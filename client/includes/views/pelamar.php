@@ -61,15 +61,28 @@ function render(){
         return true;
     });
     if(list.length===0){rows.innerHTML='<tr><td colspan="6" class="py-12 text-center text-slate-400">Tidak ada pelamar.</td></tr>';return;}
-    rows.innerHTML=list.map(p=>`
+    rows.innerHTML=list.map(p=>{
+        const initial = p.nama_lengkap.charAt(0).toUpperCase();
+        const fotoUrl = p.foto_3x4 ? `${ADMIN.baseUrl}/uploads/foto/${p.foto_3x4}` : '';
+        return `
     <tr class="border-b border-slate-50 hover:bg-slate-50/60">
-        <td class="px-4 py-3"><a href="${ADMIN.baseUrl}/client/pelamar_detail/${p.id}" class="font-bold text-slate-900 hover:text-brand-600">${p.nama_lengkap}</a><p class="text-xs text-slate-500">${p.email}</p></td>
+        <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+                ${fotoUrl
+                    ? `<img src="${fotoUrl}" class="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0">`
+                    : `<div class="w-9 h-9 rounded-full gradient-brand text-white flex items-center justify-center font-bold text-sm shrink-0">${initial}</div>`}
+                <div class="min-w-0">
+                    <a href="${ADMIN.baseUrl}/client/pelamar_detail/${p.id}" class="font-bold text-slate-900 hover:text-brand-600 truncate block">${p.nama_lengkap}</a>
+                    <p class="text-xs text-slate-500 truncate">${p.email}</p>
+                </div>
+            </div>
+        </td>
         <td class="px-4 py-3 text-slate-700">${p.posisi_dilamar}</td>
         <td class="px-4 py-3 text-slate-600">${p.penempatan}</td>
         <td class="px-4 py-3">${ADMIN.statusBadge(p.status_lamaran)}</td>
         <td class="px-4 py-3 text-slate-600 whitespace-nowrap">${ADMIN.formatDateTime(p.created_at)}</td>
         <td class="px-4 py-3 text-right"><a href="${ADMIN.baseUrl}/client/pelamar_detail/${p.id}" class="px-3 py-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold"><i class="fa-solid fa-eye mr-1"></i>Detail</a></td>
-    </tr>`).join('');
+    </tr>`;}).join('');
 }
 
 [q,st,pos].forEach(el=>el.addEventListener('input',render));

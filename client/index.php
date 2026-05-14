@@ -150,7 +150,7 @@ $titles = [
     <div class="flex min-h-screen">
         <?php renderSidebar($page, $admin_user); ?>
 
-        <div class="flex-1 flex flex-col min-w-0">
+        <div class="flex-1 flex flex-col min-w-0 lg:ml-[70px] transition-all duration-300">
             <?php renderTopbar($pageTitle, $pageSubtitle); ?>
 
             <script>
@@ -289,7 +289,7 @@ $titles = [
     });
     </script>
 
-            <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+            <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden">
                 <?php
                 $view_file = __DIR__ . "/includes/views/{$page}.php";
                 if (file_exists($view_file)) {
