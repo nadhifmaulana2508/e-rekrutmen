@@ -3,3 +3,9 @@
     Order allow,deny
     Deny from all
 </FilesMatch>
+
+# API routing: jika file tidak ditemukan, teruskan ke api/index.php
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?request=$1 [QSA,L]

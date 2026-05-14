@@ -1,0 +1,8 @@
+{
+    "name": "bprbkkjateng/e-rekrutmen",
+    "description": "E-Form Rekrutmen Pegawai - PT BPR BKK Jateng (Perseroda)",
+    "require": {
+        "php": ">=8.0",
+        "phpmailer/phpmailer": "^6.9"
+    }
+}

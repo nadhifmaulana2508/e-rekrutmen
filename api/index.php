@@ -2,8 +2,23 @@
 
 require_once __DIR__ . '/helpers/response.php';
 
-$request  = $_GET['request'] ?? '';
-$segments = explode('/', trim($request, '/'));
+// Support both routing paths:
+// 1. Called from front controller: $_GET['request'] already set
+// 2. Called directly via api/.htaccess rewrite: $_GET['request'] from rewrite
+$request = $_GET['request'] ?? '';
+
+// Fallback: parse from REQUEST_URI if request is empty
+if ($request === '' && isset($_SERVER['REQUEST_URI'])) {
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    // Find /api/ in the URI and take everything after it
+    $pos = strpos($uri, '/api/');
+    if ($pos !== false) {
+        $request = substr($uri, $pos + 5); // +5 for "/api/"
+    }
+}
+
+$request  = trim($request, '/');
+$segments = $request !== '' ? explode('/', $request) : [''];
 $endpoint = $segments[0] ?? '';
 
 // simpan segments untuk dipakai di route

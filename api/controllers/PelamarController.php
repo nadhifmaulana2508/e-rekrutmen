@@ -326,6 +326,13 @@ class PelamarController {
         if (!in_array($status, $allowed, true)) {
             sendResponse(400, 'Status tidak valid');
         }
+        
+        // Get pelamar data for email
+        $pelamar = $this->pdo->prepare('SELECT nama_lengkap, email, posisi_dilamar, kode_tracking FROM pelamar WHERE id=:id');
+        $pelamar->execute([':id' => $id]);
+        $p = $pelamar->fetch();
+        if (!$p) sendResponse(404, 'Pelamar tidak ditemukan');
+        
         $stmt = $this->pdo->prepare(
             'UPDATE pelamar SET status_lamaran=:s, catatan_admin=:c WHERE id=:id'
         );
@@ -334,8 +341,24 @@ class PelamarController {
             ':c'  => $data['catatan_admin'] ?? null,
             ':id' => $id,
         ]);
-        if ($stmt->rowCount() === 0) sendResponse(404, 'Pelamar tidak ditemukan');
-        sendResponse(200, 'Status pelamar diperbarui');
+        
+        // Kirim email notifikasi perubahan status
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $scriptDir = dirname(dirname($_SERVER['SCRIPT_NAME'] ?? '/'));
+        $baseUrl  = $protocol . '://' . $host . rtrim($scriptDir, '/');
+        
+        sendStatusUpdateEmail(
+            $p['email'],
+            $p['nama_lengkap'],
+            $p['kode_tracking'],
+            $p['posisi_dilamar'],
+            $status,
+            $data['catatan_admin'] ?? '',
+            $baseUrl
+        );
+        
+        sendResponse(200, 'Status pelamar diperbarui & notifikasi email dikirim');
     }
 
     /** DELETE /api/pelamar/{id} (admin) */

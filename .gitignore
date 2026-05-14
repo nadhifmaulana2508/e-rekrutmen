@@ -1,8 +1,9 @@
-api/.env
 .env
+api/.env
+vendor/
 uploads/cv/*
 uploads/foto/*
 !uploads/cv/.gitkeep
 !uploads/foto/.gitkeep
 .DS_Store
-zzz/
+api/test.php

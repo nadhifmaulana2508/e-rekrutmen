@@ -9,40 +9,47 @@ class LowonganController {
 
     /** GET /api/lowongan (public) */
     public function index(array $query): void {
-        $where  = [];
-        $params = [];
+        try {
+            $where  = [];
+            $params = [];
 
-        if (!empty($query['all'])) {
-            if (!empty($query['status'])) {
-                $where[] = 'status = :status';
-                $params[':status'] = $query['status'];
+            // Hanya filter string params yang valid (exclude internal routing keys)
+            $routingKeys = ['url', 'request', 'segments', 'page', 'id'];
+
+            if (!empty($query['all'])) {
+                if (!empty($query['status'])) {
+                    $where[] = 'status = :status';
+                    $params[':status'] = $query['status'];
+                }
+            } else {
+                $where[] = "status = 'aktif'";
             }
-        } else {
-            $where[] = "status = 'aktif'";
+
+            if (!empty($query['q']) && is_string($query['q'])) {
+                $where[] = '(judul LIKE :q OR deskripsi LIKE :q)';
+                $params[':q'] = '%' . $query['q'] . '%';
+            }
+
+            $sql = 'SELECT l.*, 
+                      (SELECT COUNT(*) FROM pelamar p WHERE p.id_lowongan = l.id) AS jumlah_pelamar
+                    FROM lowongan l';
+            if ($where) $sql .= ' WHERE ' . implode(' AND ', $where);
+            $sql .= ' ORDER BY l.created_at DESC';
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            $rows = $stmt->fetchAll();
+
+            // Decode JSON fields
+            foreach ($rows as &$r) {
+                $r['posisi_tersedia']     = json_decode($r['posisi_tersedia'] ?? '[]', true) ?: [];
+                $r['penempatan_tersedia'] = json_decode($r['penempatan_tersedia'] ?? '[]', true) ?: [];
+            }
+
+            sendResponse(200, 'Data lowongan', $rows);
+        } catch (Throwable $e) {
+            sendResponse(500, 'Error query lowongan: ' . $e->getMessage());
         }
-
-        if (!empty($query['q'])) {
-            $where[] = '(judul LIKE :q OR deskripsi LIKE :q)';
-            $params[':q'] = '%' . $query['q'] . '%';
-        }
-
-        $sql = 'SELECT l.*, 
-                  (SELECT COUNT(*) FROM pelamar p WHERE p.id_lowongan = l.id) AS jumlah_pelamar
-                FROM lowongan l';
-        if ($where) $sql .= ' WHERE ' . implode(' AND ', $where);
-        $sql .= ' ORDER BY l.created_at DESC';
-
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
-        $rows = $stmt->fetchAll();
-
-        // Decode JSON fields
-        foreach ($rows as &$r) {
-            $r['posisi_tersedia']     = json_decode($r['posisi_tersedia'] ?? '[]', true) ?: [];
-            $r['penempatan_tersedia'] = json_decode($r['penempatan_tersedia'] ?? '[]', true) ?: [];
-        }
-
-        sendResponse(200, 'Data lowongan', $rows);
     }
 
     /** GET /api/lowongan/{id} (public) */
