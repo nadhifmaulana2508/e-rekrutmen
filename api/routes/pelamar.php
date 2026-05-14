@@ -20,8 +20,15 @@ if ($seg1 === 'track' && $method === 'GET') {
 
 // POST /api/pelamar  (public, multipart/form-data)
 if ($seg1 === '' && $method === 'POST') {
+    // Stricter rate limit for form submissions (5 per 10 minutes)
+    rateLimitSubmission();
+
     // Untuk multipart, data ada di $_POST
     $data = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
+
+    // Sanitize all text inputs
+    sanitizeAllInput($data);
+
     $ctrl->store($data, $_FILES);
 }
 

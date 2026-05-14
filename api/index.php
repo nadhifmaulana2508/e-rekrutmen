@@ -1,6 +1,13 @@
 <?php
 
 require_once __DIR__ . '/helpers/response.php';
+require_once __DIR__ . '/middlewares/securityMiddleware.php';
+
+// Apply security headers to all API responses
+setSecurityHeaders();
+
+// Rate limiting for all requests (60 req/min per IP)
+rateLimitCheck(60, 60);
 
 // Support both routing paths:
 // 1. Called from front controller: $_GET['request'] already set

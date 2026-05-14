@@ -1,7 +1,10 @@
 <?php
 // BASE_URL sudah diset oleh front controller root. Fallback jika dipanggil langsung:
 if (!defined('BASE_URL')) {
-    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
+            || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            || (isset($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on');
+    $protocol = $isHttps ? 'https' : 'http';
     $folder   = rtrim(dirname(dirname($_SERVER['SCRIPT_NAME'])), '/\\');
     define('BASE_URL', $protocol . '://' . $_SERVER['HTTP_HOST'] . $folder);
 }
@@ -70,7 +73,15 @@ $titles = [
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
+    <style>
+        /* Fix icon boxes on iOS Safari */
+        .fa-solid, .fa-regular, .fa-brands,
+        .fas, .far, .fab {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
     <style>
         body { font-family:'Plus Jakarta Sans', sans-serif; }
         .gradient-brand { background: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%); }

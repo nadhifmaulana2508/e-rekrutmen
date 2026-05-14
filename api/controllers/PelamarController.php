@@ -40,6 +40,17 @@ class PelamarController {
             sendResponse(400, 'Format email tidak valid');
         }
 
+        // Validasi NIK (16 digit angka)
+        if (!preg_match('/^\d{16}$/', $data['nomor_ktp'])) {
+            sendResponse(400, 'Nomor KTP harus 16 digit angka');
+        }
+
+        // Validasi no HP (minimal 10 digit, dimulai 0 atau +62)
+        $hp = preg_replace('/[^0-9+]/', '', $data['no_hp']);
+        if (!preg_match('/^(\+62|0)\d{9,13}$/', $hp)) {
+            sendResponse(400, 'Format nomor HP tidak valid');
+        }
+
         // Cegah duplicate (email + lowongan)
         $dup = $this->pdo->prepare('SELECT id FROM pelamar WHERE id_lowongan=:l AND email=:e');
         $dup->execute([':l' => $id_lowongan, ':e' => $data['email']]);
