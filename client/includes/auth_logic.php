@@ -50,20 +50,21 @@ function determineRole(string $unitKerja): string {
 }
 
 // Handle login POST
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['username'], $_POST['password'])) {
-    $username = trim($_POST['username']);
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['id_peg'], $_POST['password'])) {
+    $id_peg  = trim($_POST['id_peg']);
     $password = (string)$_POST['password'];
 
-    if ($username === '' || $password === '') {
-        $error_login = 'Username dan password wajib diisi';
+    if ($id_peg === '' || $password === '') {
+        $error_login = 'ID Pegawai dan password wajib diisi';
     } else {
         try {
             $ssoUrl = getSsoApiUrl();
 
             // Kirim request ke SSO API
             $postData = json_encode([
-                'username' => $username,
+                'id_peg'   => $id_peg,
                 'password' => $password,
+                'app'      => 'rekrutmen',
             ]);
 
             $ch = curl_init($ssoUrl);
@@ -117,8 +118,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['username'], $
 
                 if ($ssoSuccess && $ssoUser) {
                     // Extract info dari SSO response
-                    $nama     = $ssoUser['nama'] ?? $ssoUser['name'] ?? $ssoUser['nama_lengkap'] ?? $username;
-                    $email    = $ssoUser['email'] ?? ($username . '@bkkjateng.co.id');
+                    $nama     = $ssoUser['nama'] ?? $ssoUser['name'] ?? $ssoUser['nama_lengkap'] ?? $id_peg;
+                    $email    = $ssoUser['email'] ?? ($id_peg . '@bkkjateng.co.id');
                     $unitKerja = $ssoUser['unit_kerja'] ?? $ssoUser['divisi'] ?? '';
                     $ssoToken = $result['token'] ?? $ssoUser['token'] ?? '';
                     $role     = determineRole($unitKerja);
@@ -127,8 +128,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['username'], $
                     require_once __DIR__ . '/../../api/helpers/JWT.php';
 
                     $payload = [
-                        'id'         => (int)($ssoUser['id'] ?? 0),
-                        'username'   => $username,
+                        'id'         => (int)($ssoUser['id'] ?? $ssoUser['id_peg'] ?? 0),
+                        'id_peg'     => $id_peg,
+                        'username'   => $ssoUser['username'] ?? $id_peg,
                         'nama'       => $nama,
                         'role'       => $role,
                         'unit_kerja' => $unitKerja,
@@ -138,8 +140,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['username'], $
 
                     $_SESSION['token'] = generateJWT($payload);
                     $_SESSION['user']  = [
-                        'id'         => (int)($ssoUser['id'] ?? 0),
-                        'username'   => $username,
+                        'id'         => (int)($ssoUser['id'] ?? $ssoUser['id_peg'] ?? 0),
+                        'id_peg'     => $id_peg,
+                        'username'   => $ssoUser['username'] ?? $id_peg,
                         'nama'       => $nama,
                         'email'      => $email,
                         'role'       => $role,

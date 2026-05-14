@@ -38,18 +38,19 @@ class AuthController {
     }
 
     public function login(array $data): void {
-        $username = trim($data['username'] ?? '');
+        $id_peg   = trim($data['id_peg'] ?? '');
         $password = (string)($data['password'] ?? '');
 
-        if ($username === '' || $password === '') {
-            sendResponse(400, 'Username dan password wajib diisi');
+        if ($id_peg === '' || $password === '') {
+            sendResponse(400, 'ID Pegawai dan password wajib diisi');
         }
 
         // === LOGIN VIA SSO API ===
         $ssoUrl = $this->getSsoApiUrl();
         $postData = json_encode([
-            'username' => $username,
+            'id_peg'   => $id_peg,
             'password' => $password,
+            'app'      => 'rekrutmen',
         ]);
 
         $ch = curl_init($ssoUrl);
@@ -103,16 +104,17 @@ class AuthController {
         }
 
         // Extract data dari SSO
-        $nama      = $ssoUser['nama'] ?? $ssoUser['name'] ?? $ssoUser['nama_lengkap'] ?? $username;
-        $email     = $ssoUser['email'] ?? ($username . '@bkkjateng.co.id');
+        $nama      = $ssoUser['nama'] ?? $ssoUser['name'] ?? $ssoUser['nama_lengkap'] ?? $id_peg;
+        $email     = $ssoUser['email'] ?? ($id_peg . '@bkkjateng.co.id');
         $unitKerja = $ssoUser['unit_kerja'] ?? $ssoUser['divisi'] ?? '';
         $ssoToken  = $result['token'] ?? $ssoUser['token'] ?? '';
         $role      = $this->determineRole($unitKerja);
 
         // Generate JWT lokal
         $payload = [
-            'id'         => (int)($ssoUser['id'] ?? 0),
-            'username'   => $username,
+            'id'         => (int)($ssoUser['id'] ?? $ssoUser['id_peg'] ?? 0),
+            'id_peg'     => $id_peg,
+            'username'   => $ssoUser['username'] ?? $id_peg,
             'nama'       => $nama,
             'role'       => $role,
             'unit_kerja' => $unitKerja,
@@ -124,8 +126,9 @@ class AuthController {
         sendResponse(200, 'Login berhasil', [
             'token' => $token,
             'user'  => [
-                'id'         => (int)($ssoUser['id'] ?? 0),
-                'username'   => $username,
+                'id'         => (int)($ssoUser['id'] ?? $ssoUser['id_peg'] ?? 0),
+                'id_peg'     => $id_peg,
+                'username'   => $ssoUser['username'] ?? $id_peg,
                 'nama'       => $nama,
                 'email'      => $email,
                 'role'       => $role,

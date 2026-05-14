@@ -125,10 +125,10 @@ $titles = [
 
                 <form method="POST" class="space-y-4">
                     <div>
-                        <label class="label">Username</label>
+                        <label class="label">ID Pegawai</label>
                         <div class="relative">
-                            <i class="fa-solid fa-user absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" name="username" required autofocus class="input pl-10" placeholder="admin">
+                            <i class="fa-solid fa-id-badge absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" name="id_peg" required autofocus class="input pl-10" placeholder="102-119">
                         </div>
                     </div>
                     <div>
