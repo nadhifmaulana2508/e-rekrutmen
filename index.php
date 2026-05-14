@@ -2,11 +2,15 @@
 // ==========================================
 // 1. DYNAMIC BASE URL
 // ==========================================
-// Detect HTTPS: also check X-Forwarded-Proto (ngrok, reverse proxy, cloudflare)
+// Detect HTTPS: check multiple indicators (ngrok, reverse proxy, cloudflare)
+$host = $_SERVER['HTTP_HOST'] ?? '';
 $isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
         || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
         || (isset($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on')
-        || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+        || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
+        || (strpos($host, '.ngrok-free.dev') !== false)
+        || (strpos($host, '.ngrok.io') !== false)
+        || (strpos($host, '.ngrok-free.app') !== false);
 $protocol = $isHttps ? 'https' : 'http';
 $domain   = $_SERVER['HTTP_HOST'];
 $folder   = dirname($_SERVER['SCRIPT_NAME']);
