@@ -58,15 +58,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
-    <style>
-        /* Fix icon boxes on iOS Safari */
-        .fa-solid, .fa-regular, .fa-brands,
-        .fas, .far, .fab {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-    </style>
+    <!-- Font Awesome 6.5.1 - Lokal (fix icon kotak-kotak di iPhone/iOS Safari) -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/fontawesome/css/all.min.css">
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }

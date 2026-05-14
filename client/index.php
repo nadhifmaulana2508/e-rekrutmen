@@ -77,15 +77,8 @@ $titles = [
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" crossorigin="anonymous">
-    <style>
-        /* Fix icon boxes on iOS Safari */
-        .fa-solid, .fa-regular, .fa-brands,
-        .fas, .far, .fab {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-    </style>
+    <!-- Font Awesome 6.5.1 - Lokal (fix icon kotak-kotak di iPhone/iOS Safari) -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/fontawesome/css/all.min.css">
     <style>
         body { font-family:'Plus Jakarta Sans', sans-serif; }
         .gradient-brand { background: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%); }
@@ -120,7 +113,7 @@ $titles = [
                         <i class="fa-solid fa-lock"></i>
                     </div>
                     <h1 class="text-2xl font-extrabold text-slate-900">Admin Panel</h1>
-                    <p class="text-sm text-slate-500 mt-1">Masuk untuk mengelola rekrutmen</p>
+                    <p class="text-sm text-slate-500 mt-1">Masuk dengan akun SSO BKK Jateng</p>
                 </div>
 
                 <?php if ($error_login): ?>
@@ -154,7 +147,7 @@ $titles = [
                 </form>
 
                 <p class="text-[11px] text-slate-400 text-center mt-6">
-                    Default: <code class="bg-slate-100 px-1.5 py-0.5 rounded">admin / admin123</code>
+                    Login menggunakan akun SSO BKK Jateng
                 </p>
             </div>
         </div>
@@ -286,6 +279,40 @@ $titles = [
                 const modal = document.body.lastElementChild;
                 modal.querySelector('[data-cancel]').onclick = () => { modal.remove(); resolve(false); };
                 modal.querySelector('[data-ok]').onclick     = () => { modal.remove(); resolve(true); };
+            });
+        },
+
+        // Prompt with input field (returns input value or null if cancelled)
+        promptCode(msg, opts = {}) {
+            return new Promise(resolve => {
+                const title       = opts.title       || 'Konfirmasi';
+                const okText      = opts.okText      || 'Ya, Lanjutkan';
+                const placeholder = opts.placeholder || 'Masukkan kode...';
+                const okColor     = opts.danger ? 'bg-rose-600 hover:bg-rose-700' : 'bg-brand-600 hover:bg-brand-700';
+                const html = `
+                <div class="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in-up">
+                    <div class="bg-white rounded-2xl max-w-sm w-full p-6">
+                        <div class="w-14 h-14 rounded-full ${opts.danger ? 'bg-rose-100 text-rose-600' : 'bg-brand-100 text-brand-600'} flex items-center justify-center text-2xl mx-auto mb-4">
+                            <i class="fa-solid ${opts.danger ? 'fa-triangle-exclamation' : 'fa-circle-question'}"></i>
+                        </div>
+                        <h3 class="text-center font-bold text-slate-900 text-lg">${title}</h3>
+                        <p class="text-center text-sm text-slate-600 mt-1 mb-3">${msg}</p>
+                        <input data-code type="text" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 mb-4" placeholder="${placeholder}" autocomplete="off">
+                        <div class="flex gap-2">
+                            <button data-cancel class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-700 text-sm">Batal</button>
+                            <button data-ok class="flex-1 py-2.5 rounded-xl ${okColor} text-white font-bold text-sm">${okText}</button>
+                        </div>
+                    </div>
+                </div>`;
+                const wrap = document.createElement('div');
+                wrap.innerHTML = html;
+                document.body.appendChild(wrap.firstElementChild);
+                const modal = document.body.lastElementChild;
+                const input = modal.querySelector('[data-code]');
+                input.focus();
+                modal.querySelector('[data-cancel]').onclick = () => { modal.remove(); resolve(null); };
+                modal.querySelector('[data-ok]').onclick     = () => { const v = input.value; modal.remove(); resolve(v); };
+                input.addEventListener('keydown', e => { if(e.key==='Enter') { const v = input.value; modal.remove(); resolve(v); } });
             });
         }
     };

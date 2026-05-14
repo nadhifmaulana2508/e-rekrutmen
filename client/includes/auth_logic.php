@@ -1,5 +1,16 @@
 <?php
-// Session-based admin login yang menyimpan token JWT dari API.
+/**
+ * Auth logic admin panel menggunakan SSO API BKK Jateng.
+ * 
+ * SSO API Endpoint:
+ * - Production: https://apisso.bkkjateng.co.id/api/auth/login
+ * - Lokal:      http://localhost/rest_api_sso/api/auth/login
+ * 
+ * Role superadmin jika unit_kerja (lowercase):
+ * - "divisi operasional"
+ * - "divisi sdm dan umum"
+ */
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -15,58 +26,138 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
+// Tentukan SSO API URL berdasarkan environment
+function getSsoApiUrl(): string {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $is_localhost = in_array($host, ['localhost', '127.0.0.1'], true)
+                || str_starts_with($host, 'localhost:')
+                || str_starts_with($host, '127.0.0.1:');
+
+    if ($is_localhost) {
+        return 'http://localhost/rest_api_sso/api/auth/login';
+    }
+    return 'https://apisso.bkkjateng.co.id/api/auth/login';
+}
+
+// Tentukan role berdasarkan unit_kerja dari SSO
+function determineRole(string $unitKerja): string {
+    $unit = strtolower(trim($unitKerja));
+    $superadminUnits = [
+        'divisi operasional',
+        'divisi sdm dan umum',
+    ];
+    return in_array($unit, $superadminUnits, true) ? 'superadmin' : 'admin';
+}
+
 // Handle login POST
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['username'], $_POST['password'])) {
-    // Pola dari PR #8 project lelang: hindari loopback HTTP, pakai PDO langsung.
-    // NOTE: Jangan panggil AuthController->login() di sini, karena sendResponse()
-    // pakai exit — response JSON-nya akan langsung dilempar ke browser.
-    // Kita verifikasi password + generate JWT langsung di sini.
-    require_once __DIR__ . '/../../api/config/database.php';
-    require_once __DIR__ . '/../../api/helpers/JWT.php';
-
     $username = trim($_POST['username']);
     $password = (string)$_POST['password'];
 
-    try {
-        $stmt = $pdo->prepare('SELECT * FROM admin WHERE username = :u LIMIT 1');
-        $stmt->execute([':u' => $username]);
-        $user = $stmt->fetch();
+    if ($username === '' || $password === '') {
+        $error_login = 'Username dan password wajib diisi';
+    } else {
+        try {
+            $ssoUrl = getSsoApiUrl();
 
-        $ok = false;
-        if ($user) {
-            $hash = (string)$user['password'];
-            if (preg_match('/^\$2[aby]\$/', $hash) || str_starts_with($hash, '$argon')) {
-                $ok = password_verify($password, $hash);
+            // Kirim request ke SSO API
+            $postData = json_encode([
+                'username' => $username,
+                'password' => $password,
+            ]);
+
+            $ch = curl_init($ssoUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $postData,
+                CURLOPT_HTTPHEADER     => [
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                ],
+                CURLOPT_TIMEOUT        => 15,
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_SSL_VERIFYPEER => false, // produksi bisa di-enable
+            ]);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($response === false || $curlError) {
+                $error_login = 'Tidak dapat terhubung ke server SSO: ' . ($curlError ?: 'Unknown error');
             } else {
-                // fallback plaintext (dev only)
-                $ok = hash_equals($hash, $password);
-            }
-        }
+                $result = json_decode($response, true);
 
-        if ($user && $ok) {
-            $payload = [
-                'id'       => (int)$user['id'],
-                'username' => $user['username'],
-                'nama'     => $user['nama'],
-                'role'     => $user['role'],
-                'iat'      => time(),
-                'exp'      => time() + 60 * 60 * 8,
-            ];
-            $_SESSION['token'] = generateJWT($payload);
-            $_SESSION['user']  = [
-                'id'       => (int)$user['id'],
-                'username' => $user['username'],
-                'nama'     => $user['nama'],
-                'email'    => $user['email'],
-                'role'     => $user['role'],
-            ];
-            header('Location: ' . BASE_URL . '/client/dashboard');
-            exit;
-        } else {
-            $error_login = 'Username atau password salah';
+                // Cek response SSO berhasil
+                // Support berbagai format response SSO:
+                // Format 1: {"status": 200, "data": {...}}
+                // Format 2: {"success": true, "data": {...}}
+                // Format 3: {"token": "...", "user": {...}}
+                $ssoSuccess = false;
+                $ssoUser = null;
+
+                if ($httpCode === 200) {
+                    if (isset($result['data']) && is_array($result['data'])) {
+                        $ssoSuccess = true;
+                        $ssoUser = $result['data'];
+                    } elseif (isset($result['user']) && is_array($result['user'])) {
+                        $ssoSuccess = true;
+                        $ssoUser = $result['user'];
+                    } elseif (isset($result['status']) && $result['status'] === 200 && isset($result['data'])) {
+                        $ssoSuccess = true;
+                        $ssoUser = $result['data'];
+                    } elseif (!empty($result['token'])) {
+                        // Token-only response, gunakan username
+                        $ssoSuccess = true;
+                        $ssoUser = $result;
+                    }
+                }
+
+                if ($ssoSuccess && $ssoUser) {
+                    // Extract info dari SSO response
+                    $nama     = $ssoUser['nama'] ?? $ssoUser['name'] ?? $ssoUser['nama_lengkap'] ?? $username;
+                    $email    = $ssoUser['email'] ?? ($username . '@bkkjateng.co.id');
+                    $unitKerja = $ssoUser['unit_kerja'] ?? $ssoUser['divisi'] ?? '';
+                    $ssoToken = $result['token'] ?? $ssoUser['token'] ?? '';
+                    $role     = determineRole($unitKerja);
+
+                    // Generate JWT lokal untuk session admin panel
+                    require_once __DIR__ . '/../../api/helpers/JWT.php';
+
+                    $payload = [
+                        'id'         => (int)($ssoUser['id'] ?? 0),
+                        'username'   => $username,
+                        'nama'       => $nama,
+                        'role'       => $role,
+                        'unit_kerja' => $unitKerja,
+                        'iat'        => time(),
+                        'exp'        => time() + 60 * 60 * 8, // 8 jam
+                    ];
+
+                    $_SESSION['token'] = generateJWT($payload);
+                    $_SESSION['user']  = [
+                        'id'         => (int)($ssoUser['id'] ?? 0),
+                        'username'   => $username,
+                        'nama'       => $nama,
+                        'email'      => $email,
+                        'role'       => $role,
+                        'unit_kerja' => $unitKerja,
+                    ];
+                    $_SESSION['sso_token'] = $ssoToken;
+
+                    header('Location: ' . BASE_URL . '/client/dashboard');
+                    exit;
+                } else {
+                    // Login gagal
+                    $msg = $result['message'] ?? $result['msg'] ?? $result['error'] ?? null;
+                    $error_login = $msg ?: 'Username atau password salah';
+                }
+            }
+        } catch (Throwable $e) {
+            $error_login = 'Server error: ' . $e->getMessage();
         }
-    } catch (Throwable $e) {
-        $error_login = 'Server error: ' . $e->getMessage();
     }
 }
 

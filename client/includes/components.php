@@ -55,7 +55,7 @@ function renderSidebar(string $page, array $user): void {
                 <div class="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-white font-bold shrink-0"><?= $initial ?></div>
                 <div class="sidebar-label flex-1 min-w-0">
                     <p class="font-bold text-sm text-slate-900 truncate"><?= htmlspecialchars($user['nama'] ?? $user['username']) ?></p>
-                    <p class="text-[11px] text-slate-500 truncate"><?= htmlspecialchars($user['email'] ?? $user['role']) ?></p>
+                    <p class="text-[11px] text-slate-500 truncate"><?= htmlspecialchars($user['unit_kerja'] ?? $user['email'] ?? $user['role']) ?></p>
                 </div>
                 <a href="<?= $base ?>/dashboard?logout=1" class="sidebar-label w-9 h-9 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-500 flex items-center justify-center transition shrink-0" title="Logout">
                     <i class="fa-solid fa-right-from-bracket"></i>

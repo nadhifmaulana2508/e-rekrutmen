@@ -173,13 +173,17 @@ if (!$id) {
         else ADMIN.toast(r.message || 'Gagal', 'error');
     });
 
-    // Delete
+    // Delete with confirmation code
     document.getElementById('btn-delete').addEventListener('click', async () => {
-        const ok = await ADMIN.confirm('Hapus data pelamar <b>'+p.nama_lengkap+'</b>?', {danger:true, okText:'Hapus'});
-        if (!ok) return;
-        const r = await ADMIN.api('/pelamar/'+id, {method:'DELETE'});
+        const kode = await ADMIN.promptCode(
+            'Hapus data pelamar <b>'+p.nama_lengkap+'</b>?',
+            {title:'Konfirmasi Hapus', placeholder:'Ketik kode konfirmasi...', okText:'Hapus Permanen', danger:true}
+        );
+        if (kode === null) return;
+        if (!kode.trim()) { ADMIN.toast('Kode konfirmasi wajib diisi','error'); return; }
+        const r = await ADMIN.api('/pelamar/'+id, {method:'DELETE', body:JSON.stringify({kode_konfirmasi: kode.trim()})});
         if (r.status===200) { ADMIN.toast('Dihapus','success'); setTimeout(()=>location.href=ADMIN.baseUrl+'/client/pelamar',700); }
-        else ADMIN.toast(r.message||'Gagal','error');
+        else ADMIN.toast(r.message||'Gagal menghapus','error');
     });
 })();
 </script>
