@@ -191,9 +191,6 @@ const saveToken = (t) => {
 };
 const saveUser = (u) => localStorage.setItem('rekrutmen_user', JSON.stringify(u));
 
-// Fallback: local API login (DB admin table)
-const API_LOCAL_LOGIN = '<?= BASE_URL ?>/api/auth/login';
-
 // Login form handler
 document.getElementById('formLogin').addEventListener('submit', async (e) => {
     e.preventDefault();
