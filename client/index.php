@@ -78,7 +78,14 @@ $titles = [
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Font Awesome 6.5.1 - Lokal (fix icon kotak-kotak di iPhone/iOS Safari) -->
+    <?php
+    $faLocalCss = __DIR__ . '/../assets/fontawesome/css/all.min.css';
+    $faLocalExists = file_exists($faLocalCss) && filesize($faLocalCss) > 5000;
+    if ($faLocalExists): ?>
     <link rel="stylesheet" href="<?= BASE_URL ?>/assets/fontawesome/css/all.min.css">
+    <?php else: ?>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <?php endif; ?>
     <style>
         body { font-family:'Plus Jakarta Sans', sans-serif; }
         .gradient-brand { background: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%); }

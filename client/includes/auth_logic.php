@@ -64,7 +64,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['id_peg'], $_P
             $postData = json_encode([
                 'id_peg'   => $id_peg,
                 'password' => $password,
-                'app'      => 'rekrutmen',
+                'app'      => 'sipatuh',
             ]);
 
             $ch = curl_init($ssoUrl);
@@ -153,9 +153,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['id_peg'], $_P
                     header('Location: ' . BASE_URL . '/client/dashboard');
                     exit;
                 } else {
-                    // Login gagal
+                    // Login gagal - tampilkan pesan error dari SSO
                     $msg = $result['message'] ?? $result['msg'] ?? $result['error'] ?? null;
-                    $error_login = $msg ?: 'Username atau password salah';
+                    if (!$msg && $httpCode !== 200) {
+                        $msg = "SSO response HTTP {$httpCode}";
+                    }
+                    $error_login = $msg ?: 'ID Pegawai atau password salah';
                 }
             }
         } catch (Throwable $e) {

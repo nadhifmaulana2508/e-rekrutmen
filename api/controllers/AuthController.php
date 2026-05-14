@@ -50,7 +50,7 @@ class AuthController {
         $postData = json_encode([
             'id_peg'   => $id_peg,
             'password' => $password,
-            'app'      => 'rekrutmen',
+            'app'      => 'sipatuh',
         ]);
 
         $ch = curl_init($ssoUrl);
