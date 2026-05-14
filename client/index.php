@@ -187,6 +187,9 @@ const saveToken = (t) => {
 };
 const saveUser = (u) => localStorage.setItem('rekrutmen_user', JSON.stringify(u));
 
+// Fallback: local API login (DB admin table)
+const API_LOCAL_LOGIN = '<?= BASE_URL ?>/api/auth/login';
+
 // Login form handler
 document.getElementById('formLogin').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -205,6 +208,9 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
     const empId = document.getElementById('id_peg').value.trim();
     const pass  = document.getElementById('password').value;
 
+    let loginSuccess = false;
+
+    // === STEP 1: Coba SSO dulu ===
     try {
         const res = await fetch(API_LOGIN, {
             method: 'POST',
@@ -212,50 +218,77 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
             body: JSON.stringify({ id_peg: empId, password: pass, app: "sipatuh" })
         });
 
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status} - Gagal koneksi ke server SSO.`);
-        const json = await res.json();
+        if (res.ok) {
+            const json = await res.json();
+            if (json?.status === 200 && json?.data?.token) {
+                // SSO berhasil!
+                saveToken(json.data.token);
 
-        if (json?.status !== 200 || !json?.data?.token) {
-            throw new Error(json?.message || 'ID Pegawai atau Password salah.');
-        }
-
-        // Simpan token
-        saveToken(json.data.token);
-
-        // Fetch whoami untuk data user lengkap
-        try {
-            const r2 = await fetch(API_WHOAMI, {
-                headers: { 'Authorization': `Bearer ${json.data.token}` }
-            });
-            if (r2.ok) {
-                const j2 = await r2.json();
-                if (j2?.data) {
-                    let userData = j2.data;
-                    // Determine role: superadmin jika divisi operasional / sdm dan umum
-                    const unitLower = (userData.unit_kerja || userData.job_position || '').toLowerCase();
-                    if (unitLower === 'divisi operasional' || unitLower === 'divisi sdm dan umum') {
-                        userData.role = 'superadmin';
-                    } else {
-                        userData.role = 'admin';
+                // Fetch whoami untuk data user lengkap
+                try {
+                    const r2 = await fetch(API_WHOAMI, {
+                        headers: { 'Authorization': `Bearer ${json.data.token}` }
+                    });
+                    if (r2.ok) {
+                        const j2 = await r2.json();
+                        if (j2?.data) {
+                            let userData = j2.data;
+                            const unitLower = (userData.unit_kerja || userData.job_position || '').toLowerCase();
+                            if (unitLower === 'divisi operasional' || unitLower === 'divisi sdm dan umum') {
+                                userData.role = 'superadmin';
+                            } else {
+                                userData.role = 'admin';
+                            }
+                            saveUser(userData);
+                        }
                     }
-                    saveUser(userData);
+                } catch (err) {
+                    console.error("Error whoami:", err);
                 }
+
+                loginSuccess = true;
             }
-        } catch (err) {
-            console.error("Error whoami:", err);
         }
+    } catch (ssoErr) {
+        console.warn("SSO login gagal, coba fallback lokal...", ssoErr.message);
+    }
 
-        // Redirect ke dashboard
+    // === STEP 2: Fallback ke local API (DB admin) ===
+    if (!loginSuccess) {
+        try {
+            const res2 = await fetch(API_LOCAL_LOGIN, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: empId, password: pass })
+            });
+
+            const json2 = await res2.json();
+
+            if (json2?.status === 200 && json2?.data?.token) {
+                // Local login berhasil!
+                saveToken(json2.data.token);
+                if (json2.data.user) {
+                    saveUser(json2.data.user);
+                }
+                loginSuccess = true;
+            } else {
+                throw new Error(json2?.message || 'ID Pegawai atau Password salah.');
+            }
+        } catch (localErr) {
+            errMsg.textContent = localErr.message.includes("Failed to fetch")
+                ? "Gagal terhubung ke server. Pastikan API berjalan."
+                : localErr.message;
+            errBox.classList.remove('hidden');
+            btn.disabled = false;
+            spin.classList.add('hidden');
+            btnText.textContent = 'Masuk';
+            return;
+        }
+    }
+
+    // === STEP 3: Redirect ke dashboard ===
+    if (loginSuccess) {
         location.href = `${BASE_APP}/dashboard`;
-
-    } catch (error) {
-        errMsg.textContent = error.message.includes("Failed to fetch")
-            ? "Gagal terhubung ke server SSO. Pastikan API berjalan."
-            : error.message;
-        errBox.classList.remove('hidden');
-        btn.disabled = false;
-        spin.classList.add('hidden');
-        btnText.textContent = 'Masuk';
     }
 });
 </script>
