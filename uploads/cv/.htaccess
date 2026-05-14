@@ -1,0 +1,15 @@
+# Prevent PHP execution in uploads/cv directory
+<FilesMatch "\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+php_flag engine off
+
+# Only allow PDF and images
+<FilesMatch "\.(jpg|jpeg|png|pdf)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+Options -Indexes

@@ -1,0 +1,15 @@
+# Prevent PHP execution in uploads/foto directory
+<FilesMatch "\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+php_flag engine off
+
+# Only allow images
+<FilesMatch "\.(jpg|jpeg|png|webp)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+
+Options -Indexes

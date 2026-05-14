@@ -1,9 +1,14 @@
 <?php
 /**
- * Upload helper dengan defensive try/catch.
- * Pola dari PR #11 & #16 project lelang: jangan sampai crash karena
- * konfigurasi server yang beda-beda (permission, ekstensi, dll).
+ * Upload helper dengan defensive try/catch + security hardening.
+ * - MIME type validation via finfo (not just extension)
+ * - File content scanning (no PHP/script injection)
+ * - Extension whitelist check
+ * - Size limits enforced
+ * - Random filenames to prevent path traversal
  */
+
+require_once __DIR__ . '/../middlewares/securityMiddleware.php';
 
 /**
  * Upload gambar (foto pelamar). Disimpan apa adanya (jpg/png/webp).
@@ -24,11 +29,29 @@ function uploadFoto(array $fileInfo, string $dir, string $prefix = 'foto'): ?str
         sendResponse(413, 'Ukuran foto maksimal 2MB');
     }
 
-    // Validasi mime
+    // Validate extension from original filename
+    $originalName = $fileInfo['name'] ?? '';
+    if (!validateFileExtension($originalName, ['jpg', 'jpeg', 'png', 'webp'])) {
+        sendResponse(415, 'Ekstensi foto harus .jpg, .jpeg, .png, atau .webp');
+    }
+
+    // Validasi MIME via finfo (more reliable than mime_content_type)
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $mime    = mime_content_type($fileInfo['tmp_name']) ?: '';
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($fileInfo['tmp_name']);
     if (!isset($allowed[$mime])) {
-        sendResponse(415, 'Format foto harus JPG, PNG, atau WEBP');
+        sendResponse(415, 'Format foto harus JPG, PNG, atau WEBP (terdeteksi: ' . $mime . ')');
+    }
+
+    // Check file is actually an image (getimagesize)
+    $imageInfo = @getimagesize($fileInfo['tmp_name']);
+    if ($imageInfo === false) {
+        sendResponse(415, 'File bukan gambar yang valid');
+    }
+
+    // Scan for embedded scripts/PHP
+    if (!validateFileContent($fileInfo['tmp_name'])) {
+        sendResponse(415, 'File foto mengandung konten berbahaya');
     }
 
     try {
@@ -63,9 +86,22 @@ function uploadCv(array $fileInfo, string $dir, string $prefix = 'cv'): ?string 
         sendResponse(413, 'Ukuran CV maksimal 3MB');
     }
 
-    $mime = mime_content_type($fileInfo['tmp_name']) ?: '';
+    // Validate extension
+    $originalName = $fileInfo['name'] ?? '';
+    if (!validateFileExtension($originalName, ['pdf'])) {
+        sendResponse(415, 'CV harus berformat PDF (.pdf)');
+    }
+
+    // Validate MIME via finfo
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($fileInfo['tmp_name']);
     if ($mime !== 'application/pdf') {
-        sendResponse(415, 'CV harus berformat PDF');
+        sendResponse(415, 'CV harus berformat PDF (terdeteksi: ' . $mime . ')');
+    }
+
+    // Scan for embedded scripts
+    if (!validateFileContent($fileInfo['tmp_name'])) {
+        sendResponse(415, 'File CV mengandung konten berbahaya');
     }
 
     try {
@@ -99,15 +135,35 @@ function uploadDokumen(array $fileInfo, string $dir, string $prefix = 'doc'): ?s
         sendResponse(413, 'Ukuran dokumen maksimal 5MB');
     }
 
+    // Validate extension from original filename
+    $originalName = $fileInfo['name'] ?? '';
+    if (!validateFileExtension($originalName, ['pdf', 'jpg', 'jpeg', 'png'])) {
+        sendResponse(415, "Ekstensi dokumen '{$prefix}' harus .pdf, .jpg, .jpeg, atau .png");
+    }
+
+    // Validate MIME type via finfo
     $allowedMime = [
         'application/pdf' => 'pdf',
         'image/jpeg'      => 'jpg',
         'image/png'       => 'png',
-        'image/webp'      => 'webp',
     ];
-    $mime = mime_content_type($fileInfo['tmp_name']) ?: '';
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime = $finfo->file($fileInfo['tmp_name']);
     if (!isset($allowedMime[$mime])) {
-        sendResponse(415, "Format dokumen '{$prefix}' harus PDF, JPG, atau PNG");
+        sendResponse(415, "Format dokumen '{$prefix}' harus PDF, JPG, atau PNG (terdeteksi: {$mime})");
+    }
+
+    // If it claims to be an image, verify it actually is
+    if (strpos($mime, 'image/') === 0) {
+        $imageInfo = @getimagesize($fileInfo['tmp_name']);
+        if ($imageInfo === false) {
+            sendResponse(415, "File dokumen '{$prefix}' bukan gambar yang valid");
+        }
+    }
+
+    // Scan for embedded scripts/PHP in all files
+    if (!validateFileContent($fileInfo['tmp_name'])) {
+        sendResponse(415, "File dokumen '{$prefix}' mengandung konten berbahaya");
     }
 
     try {
