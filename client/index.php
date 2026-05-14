@@ -165,11 +165,13 @@ $faCssUrl = $faLocalExists
 // ===== SSO LOGIN LOGIC (seperti monbis) =====
 const BASE_APP = '<?= BASE_URL ?>/client';
 const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isBkkDomain = window.location.hostname.endsWith('.bkkjateng.co.id');
 const API_SSO_BASE = isLocal ? 'http://localhost/rest_api_sso' : 'https://apisso.bkkjateng.co.id';
 const API_LOGIN  = `${API_SSO_BASE}/api/auth/login`;
 const API_WHOAMI = `${API_SSO_BASE}/api/auth/whoami`;
 
-// Cookie helper
+// Fallback: local API login (DB admin table + SSO proxy)
+const API_LOCAL_LOGIN = '<?= BASE_URL ?>/api/auth/login';
 function setSSOCookie(name, value, days) {
     let expires = "";
     if (days) {
@@ -177,7 +179,9 @@ function setSSOCookie(name, value, days) {
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
         expires = "; expires=" + date.toUTCString();
     }
-    const domainStr = isLocal ? "" : "domain=.bkkjateng.co.id;";
+    // Hanya set domain cookie kalau di *.bkkjateng.co.id
+    const isBkkDomain = window.location.hostname.endsWith('.bkkjateng.co.id');
+    const domainStr = isBkkDomain ? "domain=.bkkjateng.co.id;" : "";
     document.cookie = name + "=" + (value || "") + expires + "; path=/; " + domainStr + " SameSite=Lax";
 }
 
@@ -210,47 +214,47 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
 
     let loginSuccess = false;
 
-    // === STEP 1: Coba SSO dulu ===
-    try {
-        const res = await fetch(API_LOGIN, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id_peg: empId, password: pass, app: "sipatuh" })
-        });
+    // Tentukan endpoint: langsung SSO hanya kalau di localhost atau domain bkkjateng
+    // Via ngrok/domain lain → pakai local API (yang proxy ke SSO di backend)
+    const useDirectSSO = isLocal || isBkkDomain;
 
-        if (res.ok) {
-            const json = await res.json();
-            if (json?.status === 200 && json?.data?.token) {
-                // SSO berhasil!
-                saveToken(json.data.token);
+    // === STEP 1: Coba SSO dulu (hanya jika direct access) ===
+    if (useDirectSSO) {
+        try {
+            const res = await fetch(API_LOGIN, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_peg: empId, password: pass, app: "sipatuh" })
+            });
 
-                // Fetch whoami untuk data user lengkap
-                try {
-                    const r2 = await fetch(API_WHOAMI, {
-                        headers: { 'Authorization': `Bearer ${json.data.token}` }
-                    });
-                    if (r2.ok) {
-                        const j2 = await r2.json();
-                        if (j2?.data) {
-                            let userData = j2.data;
-                            const unitLower = (userData.unit_kerja || userData.job_position || '').toLowerCase();
-                            if (unitLower === 'divisi operasional' || unitLower === 'divisi sdm dan umum') {
-                                userData.role = 'superadmin';
-                            } else {
-                                userData.role = 'admin';
+            if (res.ok) {
+                const json = await res.json();
+                if (json?.status === 200 && json?.data?.token) {
+                    saveToken(json.data.token);
+                    try {
+                        const r2 = await fetch(API_WHOAMI, {
+                            headers: { 'Authorization': `Bearer ${json.data.token}` }
+                        });
+                        if (r2.ok) {
+                            const j2 = await r2.json();
+                            if (j2?.data) {
+                                let userData = j2.data;
+                                const unitLower = (userData.unit_kerja || userData.job_position || '').toLowerCase();
+                                if (unitLower === 'divisi operasional' || unitLower === 'divisi sdm dan umum') {
+                                    userData.role = 'superadmin';
+                                } else {
+                                    userData.role = 'admin';
+                                }
+                                saveUser(userData);
                             }
-                            saveUser(userData);
                         }
-                    }
-                } catch (err) {
-                    console.error("Error whoami:", err);
+                    } catch (err) { console.error("Error whoami:", err); }
+                    loginSuccess = true;
                 }
-
-                loginSuccess = true;
             }
+        } catch (ssoErr) {
+            console.warn("SSO login gagal, coba fallback lokal...", ssoErr.message);
         }
-    } catch (ssoErr) {
-        console.warn("SSO login gagal, coba fallback lokal...", ssoErr.message);
     }
 
     // === STEP 2: Fallback ke local API (DB admin) ===
@@ -406,7 +410,8 @@ function logoutSSO(e) {
     localStorage.removeItem('rekrutmen_token');
     localStorage.removeItem('rekrutmen_user');
     document.cookie = "sso_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    if(!isLocal) { document.cookie = "sso_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.bkkjateng.co.id;"; }
+    const isBkkDomain = window.location.hostname.endsWith('.bkkjateng.co.id');
+    if(isBkkDomain) { document.cookie = "sso_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.bkkjateng.co.id;"; }
     window.location.href = BASE_APP + '/login';
 }
 
