@@ -2,7 +2,12 @@
 // ==========================================
 // 1. DYNAMIC BASE URL
 // ==========================================
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+// Detect HTTPS: also check X-Forwarded-Proto (ngrok, reverse proxy, cloudflare)
+$isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
+        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+        || (isset($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on')
+        || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+$protocol = $isHttps ? 'https' : 'http';
 $domain   = $_SERVER['HTTP_HOST'];
 $folder   = dirname($_SERVER['SCRIPT_NAME']);
 $folder   = ($folder === '/' || $folder === '\\') ? '' : $folder;

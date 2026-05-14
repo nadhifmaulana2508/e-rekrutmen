@@ -39,7 +39,7 @@ function loadEnv(string $file): array {
     }
     $data = parse_ini_file($file, false, INI_SCANNER_RAW);
     if ($data === false) {
-        sendResponse(500, "Gagal membaca .env di: {$file}");
+        sendResponse(500, "Gagal membaca .env di: {$file}. Pastikan format file benar.");
         exit;
     }
     return $data;
@@ -73,6 +73,14 @@ try {
     ];
     $pdo = new PDO($dsn, $DB_USER, $DB_PASS, $options);
 } catch (PDOException $e) {
-    sendResponse(500, "Koneksi database gagal: " . $e->getMessage());
+    $hint = '';
+    if (strpos($e->getMessage(), 'Unknown database') !== false) {
+        $hint = " Buat database '{$DB_NAME}' dulu di phpMyAdmin, lalu import file sql/schema.sql.";
+    } elseif (strpos($e->getMessage(), 'Access denied') !== false) {
+        $hint = " Periksa username/password di file .env (DB_USER dan DB_PASS).";
+    } elseif (strpos($e->getMessage(), 'Connection refused') !== false) {
+        $hint = " Pastikan MySQL/MariaDB sudah running di XAMPP/Laragon.";
+    }
+    sendResponse(500, "Koneksi database gagal: " . $e->getMessage() . $hint);
     exit;
 }
