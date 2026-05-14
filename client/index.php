@@ -150,7 +150,7 @@ $titles = [
     <div class="flex min-h-screen">
         <?php renderSidebar($page, $admin_user); ?>
 
-        <div class="flex-1 flex flex-col min-w-0 lg:ml-[70px] transition-all duration-300">
+        <div id="main-content" class="flex-1 flex flex-col min-w-0 lg:ml-[260px] transition-all duration-300">
             <?php renderTopbar($pageTitle, $pageSubtitle); ?>
 
             <script>
@@ -275,10 +275,44 @@ $titles = [
         }
     };
 
-    // Sidebar toggle (mobile)
-    const sidebar  = document.getElementById('sidebar');
-    const overlay  = document.getElementById('sidebar-overlay');
-    const btnOpen  = document.getElementById('toggle-sidebar');
+    // Sidebar toggle (push layout)
+    const sidebar      = document.getElementById('sidebar');
+    const overlay      = document.getElementById('sidebar-overlay');
+    const btnOpen      = document.getElementById('toggle-sidebar');
+    const btnToggle    = document.getElementById('sidebar-toggle-btn');
+    const toggleIcon   = document.getElementById('toggle-icon');
+    const mainContent  = document.getElementById('main-content');
+    const sidebarLabels = document.querySelectorAll('.sidebar-label');
+
+    let sidebarExpanded = localStorage.getItem('sidebar_expanded') !== 'false';
+
+    function setSidebarState(expanded) {
+        sidebarExpanded = expanded;
+        localStorage.setItem('sidebar_expanded', expanded);
+        if (expanded) {
+            sidebar.style.width = '260px';
+            mainContent.style.marginLeft = '260px';
+            toggleIcon.className = 'fa-solid fa-chevron-left text-xs';
+            sidebarLabels.forEach(el => { el.style.opacity = '1'; el.style.width = 'auto'; el.style.overflow = 'visible'; });
+        } else {
+            sidebar.style.width = '70px';
+            mainContent.style.marginLeft = '70px';
+            toggleIcon.className = 'fa-solid fa-chevron-right text-xs';
+            sidebarLabels.forEach(el => { el.style.opacity = '0'; el.style.width = '0'; el.style.overflow = 'hidden'; });
+        }
+    }
+
+    // Initialize state on desktop
+    if (window.innerWidth >= 1024) {
+        setSidebarState(sidebarExpanded);
+    }
+
+    // Desktop toggle button
+    btnToggle?.addEventListener('click', () => {
+        setSidebarState(!sidebarExpanded);
+    });
+
+    // Mobile toggle
     btnOpen?.addEventListener('click', () => {
         sidebar.classList.remove('-translate-x-full');
         overlay.classList.remove('hidden');

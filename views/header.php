@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="theme-color" content="#1e40af">
     <meta name="description" content="E-Form Rekrutmen Pegawai - Temukan karier impianmu bersama kami.">
 
     <title>E-Form Rekrutmen Pegawai</title>
@@ -17,13 +17,28 @@
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui'] },
                     colors: {
                         brand: {
-                            50:  '#eef2ff',
-                            100: '#e0e7ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            800: '#3730a3',
-                            900: '#312e81',
+                            50:  '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        accent: {
+                            50:  '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
                         }
                     },
                     animation: {
@@ -47,12 +62,13 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .gradient-brand { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%); }
-        .gradient-text  { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .gradient-brand { background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #f97316 100%); }
+        .gradient-text  { background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #f97316 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .gradient-blue  { background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%); }
         .mesh-bg { background-image:
-            radial-gradient(at 20% 20%, rgba(99,102,241,0.15) 0, transparent 50%),
-            radial-gradient(at 80% 10%, rgba(236,72,153,0.12) 0, transparent 50%),
-            radial-gradient(at 10% 90%, rgba(139,92,246,0.12) 0, transparent 50%);
+            radial-gradient(at 20% 20%, rgba(37,99,235,0.12) 0, transparent 50%),
+            radial-gradient(at 80% 10%, rgba(249,115,22,0.10) 0, transparent 50%),
+            radial-gradient(at 10% 90%, rgba(100,116,139,0.08) 0, transparent 50%);
         }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -62,4 +78,4 @@
         .line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body class="bg-gray-50 text-slate-800 antialiased">

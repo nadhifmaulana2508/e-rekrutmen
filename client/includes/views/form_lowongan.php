@@ -21,7 +21,7 @@ $masterPenempatan = [
     'Kab. Pekalongan','Batang',
 ];
 ?>
-<div class="max-w-4xl">
+<div class="w-full max-w-full">
     <form id="form-lowongan" class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
         <div class="p-6 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-pink-50">
             <h2 class="text-xl font-extrabold text-slate-900" id="form-title"><?= $editId ? 'Edit Lowongan' : 'Buat Lowongan Baru' ?></h2>
@@ -50,7 +50,7 @@ $masterPenempatan = [
             <!-- POSISI (checkbox picklist + custom add) -->
             <div>
                 <label class="label">Posisi yang Dibuka <span class="text-rose-500">*</span> <span class="text-xs font-normal text-slate-400">(centang yang ingin dibuka)</span></label>
-                <div id="posisi-container" class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div id="posisi-container" class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 max-h-72 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
                     <?php foreach ($masterPosisi as $p): ?>
                         <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-white p-1.5 rounded-lg transition">
                             <input type="checkbox" name="posisi_tersedia[]" value="<?= htmlspecialchars($p) ?>" class="accent-brand-600 chk-posisi">
@@ -74,7 +74,7 @@ $masterPenempatan = [
                     <button type="button" id="btn-sel-all-loc" class="text-xs px-3 py-1 rounded-lg bg-brand-50 text-brand-700 font-bold hover:bg-brand-100">Pilih Semua</button>
                     <button type="button" id="btn-desel-all-loc" class="text-xs px-3 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">Hapus Semua</button>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 max-h-72 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
                     <?php foreach ($masterPenempatan as $loc): ?>
                         <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-white p-1.5 rounded-lg transition">
                             <input type="checkbox" name="penempatan_tersedia[]" value="<?= htmlspecialchars($loc) ?>" class="accent-brand-600 chk-penempatan">
@@ -86,7 +86,7 @@ $masterPenempatan = [
             </div>
 
             <!-- Deadline & Status -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                     <label class="label">Deadline Pelamaran</label>
                     <input type="date" name="deadline" class="input">
