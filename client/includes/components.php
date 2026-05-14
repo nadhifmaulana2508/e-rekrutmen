@@ -19,10 +19,10 @@ function renderSidebar(string $page, array $user): void {
         <!-- Brand -->
         <div class="h-16 px-6 flex items-center gap-3 border-b border-slate-100 shrink-0">
             <div class="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center text-white shadow-md">
-                <i class="fa-solid fa-user-tie"></i>
+                <i class="fa-solid fa-building-columns"></i>
             </div>
             <div>
-                <p class="font-extrabold text-slate-900 leading-tight">Rekrutmen</p>
+                <p class="font-extrabold text-slate-900 leading-tight">BPR BKK Jateng</p>
                 <p class="text-[11px] text-slate-500 font-medium">Admin Panel</p>
             </div>
         </div>

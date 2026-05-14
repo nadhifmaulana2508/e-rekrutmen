@@ -43,6 +43,7 @@ if ($urlParts[0] === 'api') {
 // 3. PUBLIC PAGES
 // ==========================================
 include __DIR__ . '/views/header.php';
+include __DIR__ . '/views/script.php';   // APP global HARUS sebelum pages yg pakai APP.api()
 include __DIR__ . '/views/navbar.php';
 
 $page  = basename($urlParts[0] ?? 'home');
@@ -76,5 +77,4 @@ if (file_exists($path)) {
     </div>';
 }
 
-include __DIR__ . '/views/script.php';
 include __DIR__ . '/views/footer.php';

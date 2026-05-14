@@ -108,11 +108,13 @@ if (!$id) {
                     <div>
                         <label class="label">Status Lamaran</label>
                         <select name="status_lamaran" class="input" required>
-                            <option value="pending"   ${p.status_lamaran === 'pending'   ? 'selected' : ''}>Pending</option>
-                            <option value="review"    ${p.status_lamaran === 'review'    ? 'selected' : ''}>Review</option>
-                            <option value="interview" ${p.status_lamaran === 'interview' ? 'selected' : ''}>Interview</option>
-                            <option value="diterima"  ${p.status_lamaran === 'diterima'  ? 'selected' : ''}>Diterima</option>
-                            <option value="ditolak"   ${p.status_lamaran === 'ditolak'   ? 'selected' : ''}>Ditolak</option>
+                            <option value="pending"          ${p.status_lamaran === 'pending'          ? 'selected' : ''}>Pending</option>
+                            <option value="review"           ${p.status_lamaran === 'review'           ? 'selected' : ''}>Review</option>
+                            <option value="tes_administrasi" ${p.status_lamaran === 'tes_administrasi' ? 'selected' : ''}>Tes Administrasi</option>
+                            <option value="tes_tertulis"     ${p.status_lamaran === 'tes_tertulis'     ? 'selected' : ''}>Tes Tertulis</option>
+                            <option value="interview"        ${p.status_lamaran === 'interview'        ? 'selected' : ''}>Interview</option>
+                            <option value="diterima"         ${p.status_lamaran === 'diterima'         ? 'selected' : ''}>Diterima</option>
+                            <option value="ditolak"          ${p.status_lamaran === 'ditolak'          ? 'selected' : ''}>Ditolak</option>
                         </select>
                     </div>
                     <div>

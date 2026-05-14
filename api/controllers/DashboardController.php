@@ -19,32 +19,25 @@ class DashboardController {
              FROM pelamar GROUP BY status_lamaran"
         )->fetchAll();
 
-        // Pelamar per lowongan (top 5)
-        $topLowongan = $this->pdo->query(
-            "SELECT l.id, l.judul, l.divisi, COUNT(p.id) AS total_pelamar
-             FROM lowongan l
-             LEFT JOIN pelamar p ON p.id_lowongan = l.id
-             GROUP BY l.id
-             ORDER BY total_pelamar DESC
-             LIMIT 5"
+        // Pelamar per posisi (top 10)
+        $topPosisi = $this->pdo->query(
+            "SELECT posisi_dilamar AS posisi, COUNT(*) AS total
+             FROM pelamar GROUP BY posisi_dilamar ORDER BY total DESC LIMIT 10"
         )->fetchAll();
 
-        // Pelamar baru 7 hari terakhir
-        $trend = $this->pdo->query(
-            "SELECT DATE(created_at) AS tanggal, COUNT(*) AS total
-             FROM pelamar
-             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-             GROUP BY DATE(created_at)
-             ORDER BY tanggal ASC"
+        // Pelamar per penempatan (top 10)
+        $topPenempatan = $this->pdo->query(
+            "SELECT penempatan, COUNT(*) AS total
+             FROM pelamar GROUP BY penempatan ORDER BY total DESC LIMIT 10"
         )->fetchAll();
 
         // Recent applications
         $recent = $this->pdo->query(
-            "SELECT p.id, p.nama_lengkap, p.email, p.status_lamaran, p.created_at,
-                    l.judul AS judul_lowongan
+            "SELECT p.id, p.nama_lengkap, p.email, p.posisi_dilamar, p.penempatan,
+                    p.status_lamaran, p.created_at, l.judul AS judul_lowongan
              FROM pelamar p
              LEFT JOIN lowongan l ON l.id=p.id_lowongan
-             ORDER BY p.created_at DESC LIMIT 8"
+             ORDER BY p.created_at DESC LIMIT 10"
         )->fetchAll();
 
         sendResponse(200, 'Dashboard stats', [
@@ -52,8 +45,8 @@ class DashboardController {
             'lowongan_aktif'  => $lowonganAktif,
             'total_pelamar'   => $totalPelamar,
             'pipeline'        => $pipeline,
-            'top_lowongan'    => $topLowongan,
-            'trend_7_hari'    => $trend,
+            'top_posisi'      => $topPosisi,
+            'top_penempatan'  => $topPenempatan,
             'recent'          => $recent,
         ]);
     }

@@ -88,6 +88,49 @@ function uploadCv(array $fileInfo, string $dir, string $prefix = 'cv'): ?string 
 }
 
 /**
+ * Upload dokumen (PDF/gambar, maks 5 MB)
+ */
+function uploadDokumen(array $fileInfo, string $dir, string $prefix = 'doc'): ?string {
+    if (empty($fileInfo['tmp_name']) || ($fileInfo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    if (($fileInfo['size'] ?? 0) > 5 * 1024 * 1024) {
+        sendResponse(413, 'Ukuran dokumen maksimal 5MB');
+    }
+
+    $allowedMime = [
+        'application/pdf' => 'pdf',
+        'image/jpeg'      => 'jpg',
+        'image/png'       => 'png',
+        'image/webp'      => 'webp',
+    ];
+    $mime = mime_content_type($fileInfo['tmp_name']) ?: '';
+    if (!isset($allowedMime[$mime])) {
+        sendResponse(415, "Format dokumen '{$prefix}' harus PDF, JPG, atau PNG");
+    }
+
+    try {
+        if (!is_dir($dir)) @mkdir($dir, 0755, true);
+        if (!is_writable($dir)) {
+            sendResponse(500, 'Folder upload tidak dapat ditulis');
+        }
+
+        $ext      = $allowedMime[$mime];
+        $filename = $prefix . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+        $target   = rtrim($dir, '/') . '/' . $filename;
+
+        if (!move_uploaded_file($fileInfo['tmp_name'], $target)) {
+            sendResponse(500, 'Gagal memindahkan dokumen ke server');
+        }
+        return $filename;
+    } catch (Throwable $e) {
+        sendResponse(500, 'Upload dokumen error: ' . $e->getMessage());
+    }
+    return null;
+}
+
+/**
  * Hapus file dengan aman. Return true jika file tidak ada / berhasil dihapus.
  */
 function safeDeleteFile(string $path): bool {

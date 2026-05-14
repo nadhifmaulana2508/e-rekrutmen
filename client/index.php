@@ -231,11 +231,13 @@ $titles = [
 
         statusBadge(s) {
             const map = {
-                pending:   ['bg-amber-100 text-amber-700',    'fa-clock',         'Pending'],
-                review:    ['bg-blue-100 text-blue-700',      'fa-eye',           'Review'],
-                interview: ['bg-purple-100 text-purple-700',  'fa-handshake',     'Interview'],
-                diterima:  ['bg-emerald-100 text-emerald-700','fa-circle-check',  'Diterima'],
-                ditolak:   ['bg-rose-100 text-rose-700',      'fa-circle-xmark',  'Ditolak'],
+                pending:          ['bg-amber-100 text-amber-700',    'fa-clock',         'Pending'],
+                review:           ['bg-blue-100 text-blue-700',      'fa-eye',           'Review'],
+                tes_administrasi: ['bg-cyan-100 text-cyan-700',      'fa-clipboard-check','Tes Admin'],
+                tes_tertulis:     ['bg-indigo-100 text-indigo-700',  'fa-pen-to-square', 'Tes Tulis'],
+                interview:        ['bg-purple-100 text-purple-700',  'fa-handshake',     'Interview'],
+                diterima:         ['bg-emerald-100 text-emerald-700','fa-circle-check',  'Diterima'],
+                ditolak:          ['bg-rose-100 text-rose-700',      'fa-circle-xmark',  'Ditolak'],
             };
             const [cls, icon, label] = map[s] || ['bg-slate-100 text-slate-700','fa-circle', s];
             return `<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-bold ${cls}"><i class="fa-solid ${icon}"></i>${label}</span>`;

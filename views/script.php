@@ -43,11 +43,13 @@ window.APP = {
 
     statusBadge(status) {
         const map = {
-            pending:   ['bg-amber-100 text-amber-700',   'fa-clock',         'Menunggu Review'],
-            review:    ['bg-blue-100 text-blue-700',     'fa-file-magnifying-glass', 'Sedang Direview'],
-            interview: ['bg-purple-100 text-purple-700', 'fa-handshake',     'Interview'],
-            diterima:  ['bg-emerald-100 text-emerald-700','fa-circle-check','Diterima'],
-            ditolak:   ['bg-rose-100 text-rose-700',     'fa-circle-xmark',  'Tidak Diterima'],
+            pending:           ['bg-amber-100 text-amber-700',   'fa-clock',              'Menunggu Review'],
+            review:            ['bg-blue-100 text-blue-700',     'fa-file-magnifying-glass','Sedang Direview'],
+            tes_administrasi:  ['bg-cyan-100 text-cyan-700',     'fa-clipboard-check',    'Tes Administrasi'],
+            tes_tertulis:      ['bg-indigo-100 text-indigo-700', 'fa-pen-to-square',      'Tes Tertulis'],
+            interview:         ['bg-purple-100 text-purple-700', 'fa-handshake',          'Interview'],
+            diterima:          ['bg-emerald-100 text-emerald-700','fa-circle-check',       'Diterima'],
+            ditolak:           ['bg-rose-100 text-rose-700',     'fa-circle-xmark',       'Tidak Lolos'],
         };
         const [cls, icon, label] = map[status] || ['bg-slate-100 text-slate-700', 'fa-circle', status];
         return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${cls}">

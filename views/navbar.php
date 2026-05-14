@@ -14,11 +14,11 @@ $navItems = [
             <!-- Logo -->
             <a href="<?= BASE_URL ?>/home" class="flex items-center gap-3 group">
                 <div class="w-10 h-10 md:w-11 md:h-11 rounded-xl gradient-brand flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform duration-300">
-                    <i class="fa-solid fa-user-tie text-lg"></i>
+                    <i class="fa-solid fa-building-columns text-lg"></i>
                 </div>
                 <div class="hidden sm:block">
-                    <p class="font-extrabold text-slate-900 leading-none text-lg">Rekrutmen</p>
-                    <p class="text-[11px] text-slate-500 font-medium">Karier Impianmu Dimulai Di Sini</p>
+                    <p class="font-extrabold text-slate-900 leading-none text-lg">BPR BKK Jateng</p>
+                    <p class="text-[11px] text-slate-500 font-medium">E-Form Rekrutmen Pegawai</p>
                 </div>
             </a>
 

@@ -7,12 +7,11 @@ class LowonganController {
 
     public function __construct(PDO $pdo) { $this->pdo = $pdo; }
 
-    /** GET /api/lowongan (public) - filter: status, divisi, tipe_kerja, q */
+    /** GET /api/lowongan (public) */
     public function index(array $query): void {
         $where  = [];
         $params = [];
 
-        // Public default: hanya yang aktif. Admin bisa kirim ?all=1 ?status=
         if (!empty($query['all'])) {
             if (!empty($query['status'])) {
                 $where[] = 'status = :status';
@@ -22,16 +21,8 @@ class LowonganController {
             $where[] = "status = 'aktif'";
         }
 
-        if (!empty($query['divisi'])) {
-            $where[] = 'divisi = :divisi';
-            $params[':divisi'] = $query['divisi'];
-        }
-        if (!empty($query['tipe_kerja'])) {
-            $where[] = 'tipe_kerja = :tipe';
-            $params[':tipe'] = $query['tipe_kerja'];
-        }
         if (!empty($query['q'])) {
-            $where[] = '(judul LIKE :q OR deskripsi LIKE :q OR lokasi LIKE :q)';
+            $where[] = '(judul LIKE :q OR deskripsi LIKE :q)';
             $params[':q'] = '%' . $query['q'] . '%';
         }
 
@@ -44,6 +35,12 @@ class LowonganController {
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
         $rows = $stmt->fetchAll();
+
+        // Decode JSON fields
+        foreach ($rows as &$r) {
+            $r['posisi_tersedia']     = json_decode($r['posisi_tersedia'] ?? '[]', true) ?: [];
+            $r['penempatan_tersedia'] = json_decode($r['penempatan_tersedia'] ?? '[]', true) ?: [];
+        }
 
         sendResponse(200, 'Data lowongan', $rows);
     }
@@ -58,38 +55,39 @@ class LowonganController {
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch();
         if (!$row) sendResponse(404, 'Lowongan tidak ditemukan');
+
+        $row['posisi_tersedia']     = json_decode($row['posisi_tersedia'] ?? '[]', true) ?: [];
+        $row['penempatan_tersedia'] = json_decode($row['penempatan_tersedia'] ?? '[]', true) ?: [];
+
         sendResponse(200, 'Detail lowongan', $row);
     }
 
     /** POST /api/lowongan (admin) */
     public function store(array $data, array $user): void {
-        $required = ['judul', 'divisi', 'lokasi', 'deskripsi', 'requirements'];
+        $required = ['judul', 'posisi_tersedia', 'penempatan_tersedia'];
         foreach ($required as $k) {
             if (empty($data[$k])) sendResponse(400, "Field {$k} wajib diisi");
         }
 
+        // Encode arrays to JSON if passed as array
+        $posisi     = is_array($data['posisi_tersedia'])     ? json_encode($data['posisi_tersedia'])     : $data['posisi_tersedia'];
+        $penempatan = is_array($data['penempatan_tersedia']) ? json_encode($data['penempatan_tersedia']) : $data['penempatan_tersedia'];
+
         $stmt = $this->pdo->prepare(
             'INSERT INTO lowongan
-             (judul, divisi, lokasi, tipe_kerja, level, deskripsi, requirements, benefits,
-              gaji_min, gaji_max, deadline, status, dibuat_oleh)
+             (judul, deskripsi, persyaratan, posisi_tersedia, penempatan_tersedia, deadline, status, dibuat_oleh)
              VALUES
-             (:judul, :divisi, :lokasi, :tipe, :level, :desk, :req, :ben,
-              :gmin, :gmax, :deadline, :status, :author)'
+             (:judul, :desk, :syarat, :posisi, :penempatan, :deadline, :status, :author)'
         );
         $stmt->execute([
-            ':judul'    => $data['judul'],
-            ':divisi'   => $data['divisi'],
-            ':lokasi'   => $data['lokasi'],
-            ':tipe'     => $data['tipe_kerja']   ?? 'full_time',
-            ':level'    => $data['level']        ?? 'junior',
-            ':desk'     => $data['deskripsi'],
-            ':req'      => $data['requirements'],
-            ':ben'      => $data['benefits']     ?? null,
-            ':gmin'     => $data['gaji_min']     ?: null,
-            ':gmax'     => $data['gaji_max']     ?: null,
-            ':deadline' => $data['deadline']     ?: null,
-            ':status'   => $data['status']       ?? 'aktif',
-            ':author'   => $user['id']           ?? null,
+            ':judul'      => $data['judul'],
+            ':desk'       => $data['deskripsi']       ?? null,
+            ':syarat'     => $data['persyaratan']     ?? null,
+            ':posisi'     => $posisi,
+            ':penempatan' => $penempatan,
+            ':deadline'   => $data['deadline']        ?: null,
+            ':status'     => $data['status']          ?? 'aktif',
+            ':author'     => $user['id']              ?? null,
         ]);
         $id = (int)$this->pdo->lastInsertId();
         sendResponse(201, 'Lowongan berhasil dibuat', ['id' => $id]);
@@ -103,13 +101,17 @@ class LowonganController {
 
         $fields = [];
         $params = [':id' => $id];
-        $allowed = ['judul','divisi','lokasi','tipe_kerja','level','deskripsi',
-                    'requirements','benefits','gaji_min','gaji_max','deadline','status'];
+        $allowed = ['judul','deskripsi','persyaratan','posisi_tersedia','penempatan_tersedia','deadline','status'];
 
         foreach ($allowed as $f) {
             if (array_key_exists($f, $data)) {
+                $val = $data[$f];
+                // Encode arrays to JSON
+                if (in_array($f, ['posisi_tersedia', 'penempatan_tersedia']) && is_array($val)) {
+                    $val = json_encode($val);
+                }
                 $fields[] = "$f = :$f";
-                $params[":$f"] = ($data[$f] === '' ? null : $data[$f]);
+                $params[":$f"] = ($val === '' ? null : $val);
             }
         }
         if (!$fields) sendResponse(400, 'Tidak ada data yang diubah');
@@ -121,7 +123,6 @@ class LowonganController {
 
     /** DELETE /api/lowongan/{id} (admin) */
     public function destroy(int $id): void {
-        // CASCADE di skema akan ikut hapus pelamar. Pastikan aman.
         $stmt = $this->pdo->prepare('DELETE FROM lowongan WHERE id=:id');
         $stmt->execute([':id' => $id]);
         if ($stmt->rowCount() === 0) sendResponse(404, 'Lowongan tidak ditemukan');
