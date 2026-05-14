@@ -1,60 +1,88 @@
 <?php
-// Support edit mode via ?edit=ID atau segmen /form_lowongan/ID
 $editId = 0;
 if (!empty($_GET['id']) && ctype_digit((string)$_GET['id'])) $editId = (int)$_GET['id'];
+
+// Master data posisi & penempatan (picklist)
+$masterPosisi = [
+    'AO Dana','AO Kredit','AO Remedial','Analis Kredit & Appraisal',
+    'Akuntansi & Pelaporan','Customer Service','Teller',
+    'Staf Manajemen Risiko','Staf Kepatuhan','Staf Strategi Anti Fraud',
+    'Staf Perlindungan Konsumen','Staf Integritas Pelaporan Keuangan',
+    'Staf APU-PPT','Staf Digital Marketing','Staf IT (Development/Security)',
+    'Staf Litbang','Staf Penyelesaian Kredit','Staf AMU dan Litigasi','Staf Diklat',
+];
+
+$masterPenempatan = [
+    'Cabang Utama (Kota Semarang)','Rembang','Pati','Demak','Kendal',
+    'Kota Salatiga','Kab. Semarang','Wonogiri','Kota Surakarta','Karanganyar',
+    'Sukoharjo','Sragen','Boyolali','Magelang','Wonosobo','Purworejo',
+    'Kebumen','Banjarnegara','Purbalingga','Banyumas','Cilacap',
+    'Kab. Tegal','Brebes','Kota Tegal','Pemalang','Kota Pekalongan',
+    'Kab. Pekalongan','Batang',
+];
 ?>
 <div class="max-w-4xl">
     <form id="form-lowongan" class="bg-white rounded-2xl border border-slate-100 overflow-hidden">
         <div class="p-6 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-pink-50">
             <h2 class="text-xl font-extrabold text-slate-900" id="form-title"><?= $editId ? 'Edit Lowongan' : 'Buat Lowongan Baru' ?></h2>
-            <p class="text-sm text-slate-500">Isi detail lowongan dengan akurat agar kandidat tertarik.</p>
+            <p class="text-sm text-slate-500">Pilih posisi & penempatan yang akan dibuka untuk batch rekrutmen ini.</p>
         </div>
 
         <div class="p-6 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="md:col-span-2">
-                    <label class="label">Judul Posisi <span class="text-rose-500">*</span></label>
-                    <input type="text" name="judul" required class="input" placeholder="Contoh: Frontend Developer">
+            <!-- Judul -->
+            <div>
+                <label class="label">Judul / Nama Batch Rekrutmen <span class="text-rose-500">*</span></label>
+                <input type="text" name="judul" required class="input" placeholder="Contoh: Rekrutmen Pegawai BPR BKK Jateng Tahun 2026">
+            </div>
+
+            <!-- Deskripsi -->
+            <div>
+                <label class="label">Deskripsi</label>
+                <textarea name="deskripsi" rows="3" class="input" placeholder="Deskripsi singkat tentang batch rekrutmen ini..."></textarea>
+            </div>
+
+            <!-- Persyaratan -->
+            <div>
+                <label class="label">Persyaratan Umum <span class="text-xs font-normal text-slate-400">(satu baris per item)</span></label>
+                <textarea name="persyaratan" rows="5" class="input" placeholder="Warga Negara Indonesia&#10;Usia maksimal 27 tahun&#10;Pendidikan minimal D3/S1&#10;IPK minimal 2.75"></textarea>
+            </div>
+
+            <!-- POSISI (checkbox picklist) -->
+            <div>
+                <label class="label">Posisi yang Dibuka <span class="text-rose-500">*</span> <span class="text-xs font-normal text-slate-400">(centang yang ingin dibuka)</span></label>
+                <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <?php foreach ($masterPosisi as $p): ?>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-white p-1.5 rounded-lg transition">
+                            <input type="checkbox" name="posisi_tersedia[]" value="<?= htmlspecialchars($p) ?>" class="accent-brand-600 chk-posisi">
+                            <span><?= htmlspecialchars($p) ?></span>
+                        </label>
+                    <?php endforeach; ?>
                 </div>
-                <div>
-                    <label class="label">Divisi <span class="text-rose-500">*</span></label>
-                    <input type="text" name="divisi" required class="input" placeholder="Teknologi / HR / Marketing">
+                <p class="text-xs text-slate-400 mt-1"><span id="count-posisi" class="font-bold text-brand-600">0</span> posisi dipilih</p>
+            </div>
+
+            <!-- PENEMPATAN (checkbox picklist) -->
+            <div>
+                <label class="label">Lokasi Penempatan <span class="text-rose-500">*</span> <span class="text-xs font-normal text-slate-400">(centang cabang yang tersedia)</span></label>
+                <div class="flex gap-2 mb-2">
+                    <button type="button" id="btn-sel-all-loc" class="text-xs px-3 py-1 rounded-lg bg-brand-50 text-brand-700 font-bold hover:bg-brand-100">Pilih Semua</button>
+                    <button type="button" id="btn-desel-all-loc" class="text-xs px-3 py-1 rounded-lg bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">Hapus Semua</button>
                 </div>
-                <div>
-                    <label class="label">Lokasi <span class="text-rose-500">*</span></label>
-                    <input type="text" name="lokasi" required class="input" placeholder="Jakarta / Remote">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <?php foreach ($masterPenempatan as $loc): ?>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-white p-1.5 rounded-lg transition">
+                            <input type="checkbox" name="penempatan_tersedia[]" value="<?= htmlspecialchars($loc) ?>" class="accent-brand-600 chk-penempatan">
+                            <span><?= htmlspecialchars($loc) ?></span>
+                        </label>
+                    <?php endforeach; ?>
                 </div>
+                <p class="text-xs text-slate-400 mt-1"><span id="count-penempatan" class="font-bold text-emerald-600">0</span> lokasi dipilih</p>
+            </div>
+
+            <!-- Deadline & Status -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="label">Tipe Kerja</label>
-                    <select name="tipe_kerja" class="input">
-                        <option value="full_time">Full Time</option>
-                        <option value="part_time">Part Time</option>
-                        <option value="kontrak">Kontrak</option>
-                        <option value="magang">Magang</option>
-                        <option value="freelance">Freelance</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="label">Level</label>
-                    <select name="level" class="input">
-                        <option value="fresh_graduate">Fresh Graduate</option>
-                        <option value="junior" selected>Junior</option>
-                        <option value="middle">Middle</option>
-                        <option value="senior">Senior</option>
-                        <option value="lead">Lead</option>
-                        <option value="manager">Manager</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="label">Gaji Min (IDR)</label>
-                    <input type="number" name="gaji_min" class="input" placeholder="8000000">
-                </div>
-                <div>
-                    <label class="label">Gaji Max (IDR)</label>
-                    <input type="number" name="gaji_max" class="input" placeholder="15000000">
-                </div>
-                <div>
-                    <label class="label">Deadline</label>
+                    <label class="label">Deadline Pelamaran</label>
                     <input type="date" name="deadline" class="input">
                 </div>
                 <div>
@@ -64,18 +92,6 @@ if (!empty($_GET['id']) && ctype_digit((string)$_GET['id'])) $editId = (int)$_GE
                         <option value="nonaktif">Nonaktif</option>
                         <option value="closed">Closed</option>
                     </select>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="label">Deskripsi Pekerjaan <span class="text-rose-500">*</span></label>
-                    <textarea name="deskripsi" rows="4" required class="input" placeholder="Gambaran umum pekerjaan, tanggung jawab, dll."></textarea>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="label">Kualifikasi <span class="text-rose-500">*</span> <span class="text-xs font-normal text-slate-400">(satu baris per item)</span></label>
-                    <textarea name="requirements" rows="5" required class="input" placeholder="Minimal S1 Teknik Informatika&#10;Menguasai PHP &amp; MySQL&#10;Pengalaman 2 tahun"></textarea>
-                </div>
-                <div class="md:col-span-2">
-                    <label class="label">Benefit <span class="text-xs font-normal text-slate-400">(satu baris per item)</span></label>
-                    <textarea name="benefits" rows="4" class="input" placeholder="BPJS Kesehatan&#10;Gaji kompetitif&#10;Remote friendly"></textarea>
                 </div>
             </div>
         </div>
@@ -95,16 +111,51 @@ if (!empty($_GET['id']) && ctype_digit((string)$_GET['id'])) $editId = (int)$_GE
     const form   = document.getElementById('form-lowongan');
     const title  = document.getElementById('form-title');
 
+    // Counter
+    const countP = document.getElementById('count-posisi');
+    const countL = document.getElementById('count-penempatan');
+    document.querySelectorAll('.chk-posisi').forEach(c => c.addEventListener('change', () => {
+        countP.textContent = document.querySelectorAll('.chk-posisi:checked').length;
+    }));
+    document.querySelectorAll('.chk-penempatan').forEach(c => c.addEventListener('change', () => {
+        countL.textContent = document.querySelectorAll('.chk-penempatan:checked').length;
+    }));
+
+    // Select/deselect all penempatan
+    document.getElementById('btn-sel-all-loc').addEventListener('click', () => {
+        document.querySelectorAll('.chk-penempatan').forEach(c => c.checked = true);
+        countL.textContent = document.querySelectorAll('.chk-penempatan:checked').length;
+    });
+    document.getElementById('btn-desel-all-loc').addEventListener('click', () => {
+        document.querySelectorAll('.chk-penempatan').forEach(c => c.checked = false);
+        countL.textContent = 0;
+    });
+
+    // Edit mode: populate
     if (editId) {
         title.textContent = 'Edit Lowongan #' + editId;
         const res = await ADMIN.api('/lowongan/' + editId);
         if (res.status === 200) {
             const d = res.data;
-            for (const [k, v] of Object.entries(d)) {
-                const el = form.elements[k];
-                if (!el) continue;
-                el.value = v ?? '';
-            }
+            form.elements.judul.value       = d.judul || '';
+            form.elements.deskripsi.value   = d.deskripsi || '';
+            form.elements.persyaratan.value = d.persyaratan || '';
+            form.elements.deadline.value    = d.deadline || '';
+            form.elements.status.value      = d.status || 'aktif';
+
+            // Check posisi
+            (d.posisi_tersedia || []).forEach(p => {
+                const chk = form.querySelector(`input[name="posisi_tersedia[]"][value="${p}"]`);
+                if (chk) chk.checked = true;
+            });
+            countP.textContent = document.querySelectorAll('.chk-posisi:checked').length;
+
+            // Check penempatan
+            (d.penempatan_tersedia || []).forEach(p => {
+                const chk = form.querySelector(`input[name="penempatan_tersedia[]"][value="${p}"]`);
+                if (chk) chk.checked = true;
+            });
+            countL.textContent = document.querySelectorAll('.chk-penempatan:checked').length;
         } else {
             ADMIN.toast(res.message || 'Lowongan tidak ditemukan', 'error');
             setTimeout(() => location.href = ADMIN.baseUrl + '/client/lowongan', 1200);
@@ -112,14 +163,30 @@ if (!empty($_GET['id']) && ctype_digit((string)$_GET['id'])) $editId = (int)$_GE
         }
     }
 
+    // Submit
     form.addEventListener('submit', async e => {
         e.preventDefault();
         const btn = document.getElementById('submit-btn');
+
+        // Collect checked values
+        const posisi = [...document.querySelectorAll('.chk-posisi:checked')].map(c => c.value);
+        const penempatan = [...document.querySelectorAll('.chk-penempatan:checked')].map(c => c.value);
+
+        if (posisi.length === 0) { ADMIN.toast('Pilih minimal 1 posisi', 'warning'); return; }
+        if (penempatan.length === 0) { ADMIN.toast('Pilih minimal 1 lokasi penempatan', 'warning'); return; }
+
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-1"></i> Menyimpan...';
 
-        const fd = new FormData(form);
-        const payload = Object.fromEntries(fd.entries());
+        const payload = {
+            judul:                form.elements.judul.value,
+            deskripsi:            form.elements.deskripsi.value,
+            persyaratan:          form.elements.persyaratan.value,
+            posisi_tersedia:      posisi,
+            penempatan_tersedia:  penempatan,
+            deadline:             form.elements.deadline.value,
+            status:               form.elements.status.value,
+        };
 
         const method = editId ? 'PUT' : 'POST';
         const path   = editId ? '/lowongan/' + editId : '/lowongan';
