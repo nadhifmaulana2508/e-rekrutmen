@@ -148,7 +148,7 @@ class PelamarController {
             ':jk'             => $data['jenis_kelamin'],
             ':tempat_lahir'   => $data['tempat_lahir'],
             ':tgl_lahir'      => $data['tanggal_lahir'],
-            ':nikah'          => $data['status_pernikahan'] ?? null,
+            ':nikah'          => self::validateEnum($data['status_pernikahan'] ?? '', ['Belum Menikah','Menikah','Cerai']),
             ':agama'          => $data['agama'] ?? null,
             ':warga'          => $data['kewarganegaraan'] ?? 'Indonesia',
             ':ktp'            => $data['nomor_ktp'],
@@ -399,5 +399,34 @@ class PelamarController {
         $row = $stmt->fetch();
         if (!$row) sendResponse(404, 'Kode tracking tidak ditemukan');
         sendResponse(200, 'Status lamaran', $row);
+    }
+
+    /**
+     * Validasi value enum - return null jika tidak valid
+     */
+    private static function validateEnum(?string $value, array $allowed): ?string {
+        if ($value === null || $value === '') return null;
+        // Coba exact match dulu
+        if (in_array($value, $allowed, true)) return $value;
+        // Coba case-insensitive match
+        foreach ($allowed as $opt) {
+            if (strcasecmp($value, $opt) === 0) return $opt;
+        }
+        // Coba mapping umum
+        $map = [
+            'belum_menikah' => 'Belum Menikah',
+            'belum menikah' => 'Belum Menikah',
+            'lajang' => 'Belum Menikah',
+            'single' => 'Belum Menikah',
+            'menikah' => 'Menikah',
+            'kawin' => 'Menikah',
+            'married' => 'Menikah',
+            'cerai' => 'Cerai',
+            'cerai_hidup' => 'Cerai',
+            'cerai_mati' => 'Cerai',
+            'divorced' => 'Cerai',
+        ];
+        $lower = strtolower(trim($value));
+        return $map[$lower] ?? null;
     }
 }
