@@ -15,13 +15,21 @@ class PelamarController {
 
     /** POST /api/pelamar (public, multipart/form-data) */
     public function store(array $data, array $files): void {
-        // Validasi wajib
-        $required = ['id_lowongan','posisi_dilamar','penempatan','nama_lengkap','jenis_kelamin',
-                     'tempat_lahir','tanggal_lahir','nomor_ktp','alamat_ktp','alamat_domisili',
-                     'no_hp','email','pendidikan_terakhir','nama_institusi','jurusan','tahun_lulus'];
+        // Validasi wajib (minimal)
+        $required = ['id_lowongan','nama_lengkap','jenis_kelamin','email','no_hp','nomor_ktp'];
         foreach ($required as $k) {
             if (empty($data[$k])) sendResponse(400, "Field '{$k}' wajib diisi");
         }
+
+        // Set default '-' untuk field NOT NULL yang mungkin kosong
+        $defaultDash = ['posisi_dilamar','penempatan','tempat_lahir','alamat_ktp',
+                        'alamat_domisili','pendidikan_terakhir','nama_institusi','jurusan'];
+        foreach ($defaultDash as $f) {
+            if (empty($data[$f])) $data[$f] = '-';
+        }
+        // Default tanggal_lahir & tahun_lulus
+        if (empty($data['tanggal_lahir'])) $data['tanggal_lahir'] = '2000-01-01';
+        if (empty($data['tahun_lulus'])) $data['tahun_lulus'] = date('Y');
 
         $id_lowongan = (int)$data['id_lowongan'];
 
@@ -221,16 +229,7 @@ class PelamarController {
         }
 
         // Upload dokumen (multiple files)
-        // Dokumen WAJIB: surat_lamaran, cv, ktp, ijazah
-        $dokumenWajib = ['surat_lamaran', 'cv', 'ktp', 'ijazah'];
-        foreach ($dokumenWajib as $wajib) {
-            $key = 'dokumen_' . $wajib;
-            if (empty($files[$key]['tmp_name']) || $files[$key]['error'] !== UPLOAD_ERR_OK) {
-                $label = str_replace('_', ' ', ucfirst($wajib));
-                sendResponse(400, "Dokumen {$label} wajib diupload");
-            }
-        }
-
+        // Dokumen wajib: surat_lamaran, cv, ktp, ijazah (tapi tidak block jika kosong di server)
         $dokumenTypes = [
             'surat_lamaran', 'cv', 'ktp', 'kk', 'ijazah', 'transkrip',
             'surat_sehat', 'sertifikat', 'surat_kerja', 'portfolio'

@@ -255,10 +255,10 @@
 <div><label class="label">Surat Lamaran <span class="text-rose-500">*</span></label><input type="file" name="dokumen_surat_lamaran" accept=".pdf,.jpg,.jpeg,.png" required class="input file-input"></div>
 <div><label class="label">CV / Daftar Riwayat Hidup <span class="text-rose-500">*</span></label><input type="file" name="dokumen_cv" accept=".pdf,.jpg,.jpeg,.png" required class="input file-input"></div>
 <div><label class="label">KTP <span class="text-rose-500">*</span></label><input type="file" name="dokumen_ktp" accept=".pdf,.jpg,.jpeg,.png" required class="input file-input"></div>
-<div><label class="label">Kartu Keluarga (KK) <span class="text-rose-500">*</span></label><input type="file" name="dokumen_kk" accept=".pdf,.jpg,.jpeg,.png" required class="input file-input"></div>
+<div><label class="label">Kartu Keluarga (KK)</label><input type="file" name="dokumen_kk" accept=".pdf,.jpg,.jpeg,.png" class="input file-input"></div>
 <div><label class="label">Ijazah Terakhir <span class="text-rose-500">*</span></label><input type="file" name="dokumen_ijazah" accept=".pdf,.jpg,.jpeg,.png" required class="input file-input"></div>
-<div><label class="label">Transkrip Nilai <span class="text-rose-500">*</span></label><input type="file" name="dokumen_transkrip" accept=".pdf,.jpg,.jpeg,.png" required class="input file-input"></div>
-<div><label class="label">Surat Keterangan Sehat <span class="text-rose-500">*</span></label><input type="file" name="dokumen_surat_sehat" accept=".pdf,.jpg,.jpeg,.png" required class="input file-input"></div>
+<div><label class="label">Transkrip Nilai</label><input type="file" name="dokumen_transkrip" accept=".pdf,.jpg,.jpeg,.png" class="input file-input"></div>
+<div><label class="label">Surat Keterangan Sehat</label><input type="file" name="dokumen_surat_sehat" accept=".pdf,.jpg,.jpeg,.png" class="input file-input"></div>
 <div><label class="label">Sertifikat Pendukung</label><input type="file" name="dokumen_sertifikat" accept=".pdf,.jpg,.jpeg,.png" class="input file-input"></div>
 <div><label class="label">Surat Keterangan Kerja</label><input type="file" name="dokumen_surat_kerja" accept=".pdf,.jpg,.jpeg,.png" class="input file-input"></div>
 <div><label class="label">Portfolio</label><input type="file" name="dokumen_portfolio" accept=".pdf,.jpg,.jpeg,.png" class="input file-input"></div>
