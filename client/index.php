@@ -182,7 +182,8 @@ function setSSOCookie(name, value, days) {
     // Hanya set domain cookie kalau di *.bkkjateng.co.id
     const isBkkDomain = window.location.hostname.endsWith('.bkkjateng.co.id');
     const domainStr = isBkkDomain ? "domain=.bkkjateng.co.id;" : "";
-    document.cookie = name + "=" + (value || "") + expires + "; path=/; " + domainStr + " SameSite=Lax";
+    const secureStr = window.location.protocol === 'https:' ? " Secure;" : "";
+    document.cookie = name + "=" + (value || "") + expires + "; path=/; " + domainStr + secureStr + " SameSite=Lax";
 }
 
 const saveToken = (t) => {
@@ -289,6 +290,18 @@ document.getElementById('formLogin').addEventListener('submit', async (e) => {
 
     // === STEP 3: Redirect ke dashboard ===
     if (loginSuccess) {
+        // Simpan token ke PHP session juga (fallback jika cookie belum ke-set)
+        try {
+            await fetch('<?= BASE_URL ?>/api/session/set-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: localStorage.getItem('rekrutmen_token'),
+                    user: JSON.parse(localStorage.getItem('rekrutmen_user') || 'null')
+                })
+            });
+        } catch(e) { console.warn('Session save failed:', e); }
+
         location.href = `${BASE_APP}/dashboard`;
     }
 });
