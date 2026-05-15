@@ -1,77 +1,50 @@
 <?php
-// Session-based admin login yang menyimpan token JWT dari API.
+/**
+ * Auth logic admin panel - Cookie-based SSO (seperti monbis).
+ * 
+ * Login dilakukan di frontend via JS fetch ke SSO API.
+ * Backend hanya cek apakah cookie `sso_token` ada.
+ * 
+ * Role superadmin jika unit_kerja (lowercase):
+ * - "divisi operasional"
+ * - "divisi sdm dan umum"
+ */
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$error_login = null;
+$error_login  = null;
 $is_logged_in = false;
 $admin_user   = null;
 
-// Handle logout
+// Handle logout (hapus cookie + localStorage di FE)
 if (isset($_GET['logout'])) {
+    // Hapus cookie sso_token
+    setcookie('sso_token', '', time() - 3600, '/');
+    // Hapus cookie domain (untuk produksi)
+    setcookie('sso_token', '', time() - 3600, '/', '.bkkjateng.co.id');
     session_destroy();
     header('Location: ' . BASE_URL . '/client/login');
     exit;
 }
 
-// Handle login POST
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && isset($_POST['username'], $_POST['password'])) {
-    // Pola dari PR #8 project lelang: hindari loopback HTTP, pakai PDO langsung.
-    // NOTE: Jangan panggil AuthController->login() di sini, karena sendResponse()
-    // pakai exit — response JSON-nya akan langsung dilempar ke browser.
-    // Kita verifikasi password + generate JWT langsung di sini.
-    require_once __DIR__ . '/../../api/config/database.php';
-    require_once __DIR__ . '/../../api/helpers/JWT.php';
+// CEK STATUS LOGIN VIA COOKIE sso_token
+$is_logged_in = isset($_COOKIE['sso_token']) && !empty($_COOKIE['sso_token']);
 
-    $username = trim($_POST['username']);
-    $password = (string)$_POST['password'];
+// Ambil user data dari localStorage (dikirim via JS ke window object)
+// Di PHP kita hanya perlu tahu apakah cookie ada untuk routing guard
+$admin_user = [
+    'id'         => 0,
+    'id_peg'     => '',
+    'username'   => '',
+    'nama'       => 'User',
+    'email'      => '',
+    'role'       => 'admin',
+    'unit_kerja' => '',
+];
 
-    try {
-        $stmt = $pdo->prepare('SELECT * FROM admin WHERE username = :u LIMIT 1');
-        $stmt->execute([':u' => $username]);
-        $user = $stmt->fetch();
-
-        $ok = false;
-        if ($user) {
-            $hash = (string)$user['password'];
-            if (preg_match('/^\$2[aby]\$/', $hash) || str_starts_with($hash, '$argon')) {
-                $ok = password_verify($password, $hash);
-            } else {
-                // fallback plaintext (dev only)
-                $ok = hash_equals($hash, $password);
-            }
-        }
-
-        if ($user && $ok) {
-            $payload = [
-                'id'       => (int)$user['id'],
-                'username' => $user['username'],
-                'nama'     => $user['nama'],
-                'role'     => $user['role'],
-                'iat'      => time(),
-                'exp'      => time() + 60 * 60 * 8,
-            ];
-            $_SESSION['token'] = generateJWT($payload);
-            $_SESSION['user']  = [
-                'id'       => (int)$user['id'],
-                'username' => $user['username'],
-                'nama'     => $user['nama'],
-                'email'    => $user['email'],
-                'role'     => $user['role'],
-            ];
-            header('Location: ' . BASE_URL . '/client/dashboard');
-            exit;
-        } else {
-            $error_login = 'Username atau password salah';
-        }
-    } catch (Throwable $e) {
-        $error_login = 'Server error: ' . $e->getMessage();
-    }
-}
-
-// Check session
-if (!empty($_SESSION['token']) && !empty($_SESSION['user'])) {
-    $is_logged_in = true;
-    $admin_user   = $_SESSION['user'];
+// Jika ada session user (fallback), gunakan itu
+if (!empty($_SESSION['user'])) {
+    $admin_user = $_SESSION['user'];
 }

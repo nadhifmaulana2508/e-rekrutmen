@@ -358,7 +358,13 @@ class PelamarController {
     }
 
     /** DELETE /api/pelamar/{id} (admin) */
-    public function destroy(int $id): void {
+    public function destroy(int $id, array $data = []): void {
+        // Validasi kode konfirmasi
+        $kode_konfirmasi = trim($data['kode_konfirmasi'] ?? '');
+        if ($kode_konfirmasi !== 'bkkbisa') {
+            sendResponse(403, 'Kode konfirmasi salah. Masukkan kode yang benar untuk menghapus data.');
+        }
+
         $q = $this->pdo->prepare('SELECT foto_3x4, foto_full_body FROM pelamar WHERE id=:id');
         $q->execute([':id' => $id]);
         $row = $q->fetch();

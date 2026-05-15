@@ -55,7 +55,8 @@ switch ($method) {
     case 'DELETE':
         requireAuth();
         if (!$id) sendResponse(400, 'ID pelamar wajib');
-        $ctrl->destroy($id);
+        $data = json_decode(file_get_contents('php://input'), true) ?? [];
+        $ctrl->destroy($id, $data);
         break;
 
     default:
