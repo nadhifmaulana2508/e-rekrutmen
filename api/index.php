@@ -69,6 +69,10 @@ switch ($endpoint) {
         require __DIR__ . '/routes/dashboard.php';
         break;
 
+    case 'session':
+        require __DIR__ . '/routes/session.php';
+        break;
+
     default:
         sendResponse(404, 'Endpoint tidak ditemukan');
 }
