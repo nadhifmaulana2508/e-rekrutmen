@@ -39,7 +39,15 @@ function setSecurityHeaders(): void {
  * Limits: 60 requests per minute for public endpoints
  */
 function rateLimitCheck(int $maxRequests = 60, int $windowSeconds = 60): void {
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    // Gunakan real client IP (behind reverse proxy/nginx)
+    $ip = $_SERVER['HTTP_X_REAL_IP']
+        ?? $_SERVER['HTTP_X_FORWARDED_FOR']
+        ?? $_SERVER['REMOTE_ADDR']
+        ?? '0.0.0.0';
+    // X-Forwarded-For bisa berisi multiple IP, ambil yang pertama
+    if (strpos($ip, ',') !== false) {
+        $ip = trim(explode(',', $ip)[0]);
+    }
     $rateLimitDir = sys_get_temp_dir() . '/rekrutmen_ratelimit';
 
     if (!is_dir($rateLimitDir)) {
@@ -148,8 +156,9 @@ function validateFileExtension(string $filename, array $allowedExtensions): bool
 }
 
 /**
- * Stricter rate limit for form submissions (5 per 10 minutes per IP)
+ * Stricter rate limit for form submissions (20 per 10 minutes per IP)
+ * Dinaikkan dari 5 karena di server semua user bisa share IP (reverse proxy)
  */
 function rateLimitSubmission(): void {
-    rateLimitCheck(5, 600);
+    rateLimitCheck(20, 600);
 }
