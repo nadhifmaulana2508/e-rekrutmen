@@ -1,6 +1,6 @@
 <?php $id = (int)($_GET['id'] ?? 0); ?>
 <section class="py-8 bg-gray-50 min-h-screen">
-<div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
 <a href="<?= BASE_URL ?>/detail/<?= $id ?>" class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-brand-600 font-semibold mb-6"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
 
 <!-- WIZARD HEADER -->
@@ -30,11 +30,11 @@
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 <div>
     <label class="label">Posisi yang Dilamar <span class="text-rose-500">*</span></label>
-    <select name="posisi_dilamar" class="input" id="sel-posisi"><option value="">-- Pilih Posisi --</option></select>
+    <select name="posisi_dilamar" required class="input" id="sel-posisi"><option value="">-- Pilih Posisi --</option></select>
 </div>
 <div>
     <label class="label">Penempatan <span class="text-rose-500">*</span></label>
-    <select name="penempatan" class="input" id="sel-penempatan"><option value="">-- Pilih Penempatan --</option></select>
+    <select name="penempatan" required class="input" id="sel-penempatan"><option value="">-- Pilih Penempatan --</option></select>
 </div>
 <div>
     <label class="label">Bersedia ditempatkan di seluruh wilayah kerja? <span class="text-rose-500">*</span></label>
@@ -86,22 +86,22 @@
 <div class="bg-white rounded-2xl border border-slate-100 p-6 mb-4">
 <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-5"><span class="w-8 h-8 rounded-lg gradient-blue text-white flex items-center justify-center text-sm font-bold">B</span> Data Pribadi</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<div class="sm:col-span-2"><label class="label">Nama Lengkap sesuai KTP <span class="text-rose-500">*</span></label><input type="text" name="nama_lengkap" class="input"></div>
+<div class="sm:col-span-2"><label class="label">Nama Lengkap sesuai KTP <span class="text-rose-500">*</span></label><input type="text" name="nama_lengkap" required class="input"></div>
 <div><label class="label">Nama Panggilan</label><input type="text" name="nama_panggilan" class="input"></div>
 <div><label class="label">Jenis Kelamin <span class="text-rose-500">*</span></label>
-    <select name="jenis_kelamin" class="input"><option value="">-- Pilih --</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
-<div><label class="label">Tempat Lahir <span class="text-rose-500">*</span></label><input type="text" name="tempat_lahir" class="input"></div>
-<div><label class="label">Tanggal Lahir <span class="text-rose-500">*</span></label><input type="date" name="tanggal_lahir" class="input"></div>
+    <select name="jenis_kelamin" required class="input"><option value="">-- Pilih --</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option></select></div>
+<div><label class="label">Tempat Lahir <span class="text-rose-500">*</span></label><input type="text" name="tempat_lahir" required class="input"></div>
+<div><label class="label">Tanggal Lahir <span class="text-rose-500">*</span></label><input type="date" name="tanggal_lahir" required class="input"></div>
 <div><label class="label">Status Pernikahan</label>
     <select name="status_pernikahan" class="input"><option value="">-- Pilih --</option><option value="Belum Menikah">Belum Menikah</option><option value="Menikah">Menikah</option><option value="Cerai">Cerai</option></select></div>
 <div><label class="label">Agama</label><input type="text" name="agama" class="input"></div>
 <div><label class="label">Kewarganegaraan</label><input type="text" name="kewarganegaraan" class="input" value="Indonesia"></div>
-<div><label class="label">Nomor KTP/NIK <span class="text-rose-500">*</span></label><input type="text" name="nomor_ktp" class="input" maxlength="16" pattern="[0-9]{16}" title="16 digit angka"></div>
+<div><label class="label">Nomor KTP/NIK <span class="text-rose-500">*</span></label><input type="text" name="nomor_ktp" required class="input" maxlength="16" pattern="[0-9]{16}" title="16 digit angka"></div>
 <div><label class="label">NPWP</label><input type="text" name="npwp" class="input"></div>
-<div class="sm:col-span-2"><label class="label">Alamat sesuai KTP <span class="text-rose-500">*</span></label><textarea name="alamat_ktp" rows="2" class="input"></textarea></div>
-<div class="sm:col-span-2"><label class="label">Alamat Domisili Saat Ini <span class="text-rose-500">*</span></label><textarea name="alamat_domisili" rows="2" class="input"></textarea></div>
-<div><label class="label">Nomor HP/WA <span class="text-rose-500">*</span></label><input type="tel" name="no_hp" class="input" placeholder="08xxx"></div>
-<div><label class="label">Email Aktif <span class="text-rose-500">*</span></label><input type="email" name="email" class="input"></div>
+<div class="sm:col-span-2"><label class="label">Alamat sesuai KTP <span class="text-rose-500">*</span></label><textarea name="alamat_ktp" required rows="2" class="input"></textarea></div>
+<div class="sm:col-span-2"><label class="label">Alamat Domisili Saat Ini <span class="text-rose-500">*</span></label><textarea name="alamat_domisili" required rows="2" class="input"></textarea></div>
+<div><label class="label">Nomor HP/WA <span class="text-rose-500">*</span></label><input type="tel" name="no_hp" required class="input" placeholder="08xxx"></div>
+<div><label class="label">Email Aktif <span class="text-rose-500">*</span></label><input type="email" name="email" required class="input"></div>
 <div><label class="label">LinkedIn / Media Sosial</label><input type="text" name="akun_linkedin" class="input" placeholder="https://linkedin.com/in/..."></div>
 <div>
     <label class="label">Foto 3x4 <span class="text-rose-500">*</span></label>
@@ -369,19 +369,23 @@ let current=0;
 
 // Build step indicator
 indicator.innerHTML=steps.map((s,i)=>`
-<div class="flex items-center gap-1 step-item" data-i="${i}">
+<div class="flex items-center gap-1 step-item cursor-pointer" data-i="${i}">
     <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ${i===0?'bg-brand-700 text-white':'bg-gray-200 text-gray-500'}">${i+1}</div>
     <span class="text-xs font-semibold whitespace-nowrap hidden sm:inline ${i===0?'text-brand-700':'text-gray-400'}">${s}</span>
     ${i<steps.length-1?'<div class="w-4 h-0.5 bg-slate-200 mx-1"></div>':''}
 </div>`).join('');
 
+let maxVisited=0; // track furthest step visited
+
 function showStep(n){
+    if(n>maxVisited) maxVisited=n;
     sections.forEach((s,i)=>{s.classList.toggle('hidden',i!==n)});
     document.querySelectorAll('.step-item').forEach((el,i)=>{
         const dot=el.querySelector('div');
         const txt=el.querySelector('span');
-        if(i<n){dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-emerald-500 text-white';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-emerald-600';}
+        if(i<n){dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-emerald-500 text-white cursor-pointer';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-emerald-600';}
         else if(i===n){dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-brand-700 text-white';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-brand-700';}
+        else if(i<=maxVisited){dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-slate-300 text-slate-700 cursor-pointer';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-slate-500';}
         else{dot.className='w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-gray-200 text-gray-500';if(txt)txt.className='text-xs font-semibold whitespace-nowrap hidden sm:inline text-gray-400';}
     });
     btnPrev.classList.toggle('hidden',n===0);
@@ -390,8 +394,19 @@ function showStep(n){
     window.scrollTo({top:0,behavior:'smooth'});
 }
 
+// Clickable step indicators - can jump to any visited step
+indicator.addEventListener('click',(e)=>{
+    const item=e.target.closest('.step-item');
+    if(!item) return;
+    const target=parseInt(item.dataset.i);
+    if(target<=maxVisited){
+        current=target;
+        showStep(current);
+    }
+});
+
 btnNext.addEventListener('click',()=>{
-    // Validate current section fields
+    // Validate current section required fields before advancing
     const sec=sections[current];
     const invalids=sec.querySelectorAll(':invalid');
     if(invalids.length>0){invalids[0].reportValidity();return;}
