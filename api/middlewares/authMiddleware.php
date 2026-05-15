@@ -4,9 +4,9 @@ require_once __DIR__ . '/../helpers/response.php';
 require_once __DIR__ . '/../helpers/JWT.php';
 
 /**
- * Pastikan request membawa Bearer token valid (SSO token).
- * Verifikasi via SSO whoami endpoint.
- * Return payload user dari token jika OK.
+ * Pastikan request membawa Bearer token valid.
+ * 1. Coba verifikasi sebagai JWT lokal
+ * 2. Fallback: verifikasi via SSO whoami
  */
 function requireAuth(): array {
     $headers = function_exists('getallheaders') ? getallheaders() : [];
@@ -20,7 +20,6 @@ function requireAuth(): array {
     if (stripos($token, 'Bearer ') === 0) {
         $token = substr($token, 7);
     } elseif (!empty($_COOKIE['sso_token'])) {
-        // Fallback: ambil dari cookie
         $token = $_COOKIE['sso_token'];
     } else {
         sendResponse(401, 'Token tidak ditemukan');
@@ -30,13 +29,13 @@ function requireAuth(): array {
         sendResponse(401, 'Token tidak ditemukan');
     }
 
-    // Coba verifikasi sebagai JWT lokal dulu (backward compat)
+    // === STEP 1: Coba verifikasi sebagai JWT lokal ===
     $user = verifyJWT($token);
     if ($user) {
         return $user;
     }
 
-    // Jika bukan JWT lokal, verifikasi via SSO whoami
+    // === STEP 2: Verifikasi via SSO whoami ===
     $host = $_SERVER['HTTP_HOST'] ?? '';
     $is_localhost = in_array($host, ['localhost', '127.0.0.1'], true)
                 || str_starts_with($host, 'localhost:')
@@ -53,31 +52,60 @@ function requireAuth(): array {
             'Authorization: Bearer ' . $token,
             'Content-Type: application/json',
         ],
-        CURLOPT_TIMEOUT        => 10,
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_SSL_VERIFYPEER => false,
     ]);
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
     curl_close($ch);
 
-    if ($httpCode !== 200 || $response === false) {
+    if ($response === false || $curlError) {
+        sendResponse(401, 'Gagal verifikasi token: ' . ($curlError ?: 'SSO tidak merespons'));
+    }
+
+    if ($httpCode !== 200) {
         sendResponse(401, 'Token tidak valid atau kadaluarsa');
     }
 
     $result = json_decode($response, true);
-    if (empty($result['data'])) {
+
+    // Support berbagai format response SSO:
+    // Format 1: {"status": 200, "data": {...}}
+    // Format 2: {"data": {...}}
+    // Format 3: {"user": {...}}
+    // Format 4: langsung flat object {"id": ..., "nama": ...}
+    $userData = null;
+
+    if (isset($result['data']) && is_array($result['data'])) {
+        $userData = $result['data'];
+    } elseif (isset($result['user']) && is_array($result['user'])) {
+        $userData = $result['user'];
+    } elseif (isset($result['status']) && $result['status'] === 200 && isset($result['data'])) {
+        $userData = $result['data'];
+    } elseif (isset($result['id']) || isset($result['employee_id']) || isset($result['nama'])) {
+        // Flat object response
+        $userData = $result;
+    }
+
+    if (!$userData) {
         sendResponse(401, 'Token tidak valid atau kadaluarsa');
     }
 
-    // Return user data dari SSO
-    $userData = $result['data'];
+    // Determine role
+    $unitKerja = $userData['unit_kerja'] ?? $userData['job_position'] ?? $userData['divisi'] ?? '';
+    $unitLower = strtolower(trim($unitKerja));
+    $role = in_array($unitLower, ['divisi operasional', 'divisi sdm dan umum'], true) ? 'superadmin' : 'admin';
+
     return [
-        'id'         => $userData['id'] ?? $userData['id_peg'] ?? 0,
+        'id'         => $userData['id'] ?? $userData['id_peg'] ?? $userData['employee_id'] ?? 0,
         'id_peg'     => $userData['employee_id'] ?? $userData['id_peg'] ?? $userData['kode'] ?? '',
-        'username'   => $userData['username'] ?? $userData['employee_id'] ?? '',
-        'nama'       => $userData['full_name'] ?? $userData['nama'] ?? '',
-        'role'       => $userData['role'] ?? 'admin',
-        'unit_kerja' => $userData['unit_kerja'] ?? $userData['job_position'] ?? '',
+        'username'   => $userData['username'] ?? $userData['account_handle'] ?? $userData['employee_id'] ?? '',
+        'nama'       => $userData['full_name'] ?? $userData['nama'] ?? $userData['nama_lengkap'] ?? '',
+        'email'      => $userData['email'] ?? '',
+        'role'       => $role,
+        'unit_kerja' => $unitKerja,
     ];
 }
