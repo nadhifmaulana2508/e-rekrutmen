@@ -221,6 +221,16 @@ class PelamarController {
         }
 
         // Upload dokumen (multiple files)
+        // Dokumen WAJIB: surat_lamaran, cv, ktp, ijazah
+        $dokumenWajib = ['surat_lamaran', 'cv', 'ktp', 'ijazah'];
+        foreach ($dokumenWajib as $wajib) {
+            $key = 'dokumen_' . $wajib;
+            if (empty($files[$key]['tmp_name']) || $files[$key]['error'] !== UPLOAD_ERR_OK) {
+                $label = str_replace('_', ' ', ucfirst($wajib));
+                sendResponse(400, "Dokumen {$label} wajib diupload");
+            }
+        }
+
         $dokumenTypes = [
             'surat_lamaran', 'cv', 'ktp', 'kk', 'ijazah', 'transkrip',
             'surat_sehat', 'sertifikat', 'surat_kerja', 'portfolio'

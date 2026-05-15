@@ -20,14 +20,26 @@ if ($seg1 === 'track' && $method === 'GET') {
 
 // POST /api/pelamar  (public, multipart/form-data)
 if ($seg1 === '' && $method === 'POST') {
-    // Stricter rate limit for form submissions (5 per 10 minutes)
+    // Stricter rate limit for form submissions (20 per 10 minutes)
     rateLimitSubmission();
 
     // Untuk multipart, data ada di $_POST
     $data = !empty($_POST) ? $_POST : (json_decode(file_get_contents('php://input'), true) ?? []);
 
-    // Sanitize all text inputs
-    sanitizeAllInput($data);
+    // Sanitize text inputs, TAPI skip field ENUM agar tidak corrupt
+    $enumFields = ['status_pernikahan', 'jenis_kelamin', 'bersedia_seluruh_wilayah',
+                   'pernah_kasus_hukum', 'hubungan_keluarga_pegawai', 'riwayat_penyakit',
+                   'ketersediaan_mulai', 'sumber_informasi', 'pendidikan_terakhir',
+                   'status_slik', 'agama', 'kewarganegaraan'];
+    foreach ($data as $key => &$value) {
+        if (is_string($value)) {
+            $value = trim($value);
+            if (!in_array($key, $enumFields, true) && !in_array($key, ['pengalaman','persyaratan','deskripsi','alamat_ktp','alamat_domisili'], true)) {
+                $value = strip_tags($value);
+            }
+        }
+    }
+    unset($value);
 
     $ctrl->store($data, $_FILES);
 }
