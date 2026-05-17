@@ -417,12 +417,15 @@ window.ADMIN = {
 // ===== LOGOUT SSO =====
 function logoutSSO(e) {
     if(e) e.preventDefault();
+    // Hapus client-side storage
     localStorage.removeItem('rekrutmen_token');
     localStorage.removeItem('rekrutmen_user');
+    // Hapus cookie (semua variasi)
     document.cookie = "sso_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     const isBkkDomain = window.location.hostname.endsWith('.bkkjateng.co.id');
     if(isBkkDomain) { document.cookie = "sso_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.bkkjateng.co.id;"; }
-    window.location.href = BASE_APP + '/login';
+    // Redirect ke server-side logout (?logout) untuk hapus PHP session
+    window.location.href = BASE_APP + '/dashboard?logout';
 }
 
 // ===== WHOAMI SYNC (auto-fetch user data) =====
