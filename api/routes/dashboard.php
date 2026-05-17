@@ -16,6 +16,12 @@ switch ($action) {
     case 'stats':
         $ctrl->stats();
         break;
+    case 'lowongan-list':
+        $ctrl->lowonganList();
+        break;
+    case 'tahun-list':
+        $ctrl->tahunList();
+        break;
     default:
         sendResponse(404, 'Endpoint dashboard tidak ditemukan');
 }
