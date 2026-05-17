@@ -80,21 +80,37 @@ class LowonganController {
         $posisi     = is_array($data['posisi_tersedia'])     ? json_encode($data['posisi_tersedia'])     : $data['posisi_tersedia'];
         $penempatan = is_array($data['penempatan_tersedia']) ? json_encode($data['penempatan_tersedia']) : $data['penempatan_tersedia'];
 
+        // Determine dibuat_oleh: hanya set jika user adalah admin lokal (ada di tabel admin)
+        // SSO user tidak punya ID di tabel admin → set NULL agar tidak melanggar FK constraint
+        $authorId = null;
+        if (!empty($user['id'])) {
+            // Cek apakah ID ini ada di tabel admin (local admin)
+            $checkAdmin = $this->pdo->prepare('SELECT id FROM admin WHERE id = :id LIMIT 1');
+            $checkAdmin->execute([':id' => (int)$user['id']]);
+            if ($checkAdmin->fetch()) {
+                $authorId = (int)$user['id'];
+            }
+        }
+
+        // Simpan nama pembuat (baik admin lokal maupun SSO user)
+        $authorNama = $user['nama'] ?? $user['username'] ?? 'Unknown';
+
         $stmt = $this->pdo->prepare(
             'INSERT INTO lowongan
-             (judul, deskripsi, persyaratan, posisi_tersedia, penempatan_tersedia, deadline, status, dibuat_oleh)
+             (judul, deskripsi, persyaratan, posisi_tersedia, penempatan_tersedia, deadline, status, dibuat_oleh, dibuat_oleh_nama)
              VALUES
-             (:judul, :desk, :syarat, :posisi, :penempatan, :deadline, :status, :author)'
+             (:judul, :desk, :syarat, :posisi, :penempatan, :deadline, :status, :author, :author_nama)'
         );
         $stmt->execute([
-            ':judul'      => $data['judul'],
-            ':desk'       => $data['deskripsi']       ?? null,
-            ':syarat'     => $data['persyaratan']     ?? null,
-            ':posisi'     => $posisi,
-            ':penempatan' => $penempatan,
-            ':deadline'   => $data['deadline']        ?: null,
-            ':status'     => $data['status']          ?? 'aktif',
-            ':author'     => $user['id']              ?? null,
+            ':judul'        => $data['judul'],
+            ':desk'         => $data['deskripsi']       ?? null,
+            ':syarat'       => $data['persyaratan']     ?? null,
+            ':posisi'       => $posisi,
+            ':penempatan'   => $penempatan,
+            ':deadline'     => $data['deadline']        ?: null,
+            ':status'       => $data['status']          ?? 'aktif',
+            ':author'       => $authorId,
+            ':author_nama'  => $authorNama,
         ]);
         $id = (int)$this->pdo->lastInsertId();
         sendResponse(201, 'Lowongan berhasil dibuat', ['id' => $id]);

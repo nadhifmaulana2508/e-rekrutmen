@@ -42,6 +42,7 @@ CREATE TABLE `lowongan` (
   `deadline` DATE DEFAULT NULL,
   `status` ENUM('aktif','nonaktif','closed') NOT NULL DEFAULT 'aktif',
   `dibuat_oleh` INT(11) DEFAULT NULL,
+  `dibuat_oleh_nama` VARCHAR(150) DEFAULT NULL COMMENT 'Nama pembuat lowongan (admin lokal atau SSO user)',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -50,13 +51,13 @@ CREATE TABLE `lowongan` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Seed lowongan default
-INSERT INTO `lowongan` (`judul`, `deskripsi`, `persyaratan`, `posisi_tersedia`, `penempatan_tersedia`, `deadline`, `status`, `dibuat_oleh`) VALUES
+INSERT INTO `lowongan` (`judul`, `deskripsi`, `persyaratan`, `posisi_tersedia`, `penempatan_tersedia`, `deadline`, `status`, `dibuat_oleh`, `dibuat_oleh_nama`) VALUES
 ('Rekrutmen Pegawai BPR BKK Jateng Tahun 2026',
  'PT BPR BKK Jateng (Perseroda) membuka kesempatan bagi putra-putri terbaik Jawa Tengah untuk bergabung sebagai pegawai tetap. Kami mencari individu yang berintegritas, profesional, dan siap berkontribusi untuk kemajuan perbankan daerah.',
  'Warga Negara Indonesia\nUsia maksimal 27 tahun per tanggal penutupan\nPendidikan minimal D3/S1 (sesuai posisi)\nIPK minimal 2.75 dari skala 4.00\nSehat jasmani dan rohani\nBerkelakuan baik (SKCK)\nTidak memiliki hubungan keluarga dengan Direksi/Komisaris\nBersedia ditempatkan di seluruh wilayah kerja perusahaan\nTidak pernah diberhentikan tidak hormat dari instansi lain',
  '["AO Dana","AO Kredit","AO Remedial","Analis Kredit & Appraisal","Akuntansi & Pelaporan","Customer Service","Teller","Staf Manajemen Risiko","Staf Kepatuhan","Staf Strategi Anti Fraud","Staf Perlindungan Konsumen","Staf Integritas Pelaporan Keuangan","Staf APU-PPT","Staf Digital Marketing","Staf IT (Development/Security)","Staf Litbang","Staf Penyelesaian Kredit","Staf AMU dan Litigasi","Staf Diklat"]',
  '["Cabang Utama (Kota Semarang)","Rembang","Pati","Demak","Kendal","Kota Salatiga","Kab. Semarang","Wonogiri","Kota Surakarta","Karanganyar","Sukoharjo","Sragen","Boyolali","Magelang","Wonosobo","Purworejo","Kebumen","Banjarnegara","Purbalingga","Banyumas","Cilacap","Kab. Tegal","Brebes","Kota Tegal","Pemalang","Kota Pekalongan","Kab. Pekalongan","Batang"]',
- '2026-07-31', 'aktif', 1);
+ '2026-07-31', 'aktif', 1, 'Super Administrator');
 
 -- ===== TABEL PELAMAR =====
 CREATE TABLE `pelamar` (
